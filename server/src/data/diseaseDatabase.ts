@@ -357,6 +357,229 @@ export const COMPREHENSIVE_DISEASE_DB = {
         ],
         severity: 'Không',
         economicImpact: 'Không có tác động âm tính'
+    },
+
+    // ============ PLUM DISEASES (MẬN) ============
+    'Bệnh than đen trên mận': {
+        keywords: ['than đen', 'anthracnose', 'plum anthracnose', 'colletotrichum', 'mận'],
+        aliases: ['Cháy quả', 'Lún quả'],
+        confidence: 0.87,
+        commonNames: ['Anthracnose', 'Black Spot on Plum'],
+        affectedCrops: ['Mận', 'Đào', 'Lê', 'Vải'],
+        symptoms: [
+            'Các đốm tròn đen trên quả',
+            'Lún sâu ở giữa đốm',
+            'Lá có đốm nâu với viền đỏ',
+            'Quả sẽ rơi hoặc héo'
+        ],
+        causes: 'Nấm Colletotrichum gloeosporioides, độ ẩm cao, mưa lớn',
+        treatment: [
+            'Phun Carbendazim 1g/lít',
+            'Phun Mancozeb 80% WP 3g/lít',
+            'Loại bỏ quả bệnh, lá bệnh'
+        ],
+        prevention: [
+            'Tỉa cành thường xuyên để thoáng gió',
+            'Tránh tưới lên quả',
+            'Nâng cao gốc để tránh ngập nước',
+            'Tiêu hủy lá rụng bị bệnh'
+        ],
+        severity: 'Cao',
+        economicImpact: 'Giảm 40-60% chất lượng quả'
+    },
+
+    'Bệnh phấn trắng trên mận': {
+        keywords: ['phấn trắng mận', 'powdery mildew plum', 'erysiphe', 'phloem necrosis'],
+        aliases: ['Phấn trắng lá', 'Mốc trắng'],
+        confidence: 0.85,
+        commonNames: ['Powdery Mildew on Plum'],
+        affectedCrops: ['Mận', 'Đào', 'Nho'],
+        symptoms: [
+            'Lớp phấn trắng trên lá',
+            'Lá cong nhăn, phát triển chậm',
+            'Quả nhỏ, vỏ xấu',
+            'Cành non bị bao phủ phấn trắng'
+        ],
+        causes: 'Nấm Podosphaera, độ ẩm 60-80%, buổi tối lạnh ngày nóng',
+        treatment: [
+            'Phun Hexaconazole 5% EC 1ml/lít',
+            'Phun Sulfur 80% WP 2g/lít',
+            'Tỉa cành để tăng thông gió'
+        ],
+        prevention: [
+            'Chọn giống kháng bệnh',
+            'Không bón nitơ quá nhiều',
+            'Tối ưu hóa thông gió'
+        ],
+        severity: 'Trung bình',
+        economicImpact: 'Giảm 20-30% năng suất'
+    },
+
+    'Bệnh rỉ sét lá mận': {
+        keywords: ['rỉ sét', 'leaf rust', 'tranzschelia', 'rust disease', 'mận'],
+        aliases: ['Lá rỉ', 'Bệnh rỉ'],
+        confidence: 0.82,
+        commonNames: ['Rust on Plum Leaves'],
+        affectedCrops: ['Mận', 'Đào', 'Lê'],
+        symptoms: [
+            'Các đốm nhỏ màu cam/nâu đỏ dưới lá',
+            'Lá vàng từ từ rồi rụng',
+            'Quả nhỏ hơn bình thường',
+            'Cây yếu, chậm phát triển'
+        ],
+        causes: 'Nấm Tranzschelia pruni-spinosae, độ ẩm cao, gió',
+        treatment: [
+            'Phun Mancozeb 80% WP 3g/lít',
+            'Phun Hexaconazole 5% EC 1ml/lít',
+            'Loại bỏ lá bệnh'
+        ],
+        prevention: [
+            'Tỉa cành để thoáng gió',
+            'Tránh tưới lên lá buổi tối',
+            'Tiêu hủy lá rụng'
+        ],
+        severity: 'Trung bình',
+        economicImpact: 'Giảm 15-25% năng suất'
+    },
+
+    // ============ PEACH DISEASES (ĐÀO) ============
+    'Bệnh cháy lá đào': {
+        keywords: ['cháy lá đào', 'leaf curl peach', 'taphrina deformans', 'đào'],
+        aliases: ['Lá cong', 'Cháy lá'],
+        confidence: 0.86,
+        commonNames: ['Peach Leaf Curl'],
+        affectedCrops: ['Đào', 'Mận'],
+        symptoms: [
+            'Lá cong, nhăn, dù già',
+            'Màu lá hỗn loạn (đỏ, vàng, xanh)',
+            'Lá sẽ rụng sớm',
+            'Cây sẽ yếu đi'
+        ],
+        causes: 'Nấm Taphrina deformans, tác động lạnh mùa xuân',
+        treatment: [
+            'Phun Carbendazim trước khi lá nở',
+            'Phun Hexaconazole',
+            'Cắt bỏ cành bệnh nặng'
+        ],
+        prevention: [
+            'Phun thuốc vào mùa đông (Bordeaux mixture)',
+            'Tỉa cành để thoáng gió',
+            'Chọn vị trí trồng ấm áp'
+        ],
+        severity: 'Cao',
+        economicImpact: 'Giảm 30-40% năng suất'
+    },
+
+    // ============ GUAVA DISEASES (ổi) ============
+    'Bệnh ghẻ trên ổi': {
+        keywords: ['ghẻ ổi', 'guava scab', 'asperisporium', 'elsinoe', 'ổi'],
+        aliases: ['Lỏi ổi', 'Bệnh ghẻ'],
+        confidence: 0.84,
+        commonNames: ['Guava Scab'],
+        affectedCrops: ['Ổi', 'Xoài'],
+        symptoms: [
+            'Các vết ghẻ trên quả',
+            'Lá có đốm lỏi xám',
+            'Quả bị dị hình, không bán được',
+            'Lá và quả cùng lúc bị bệnh'
+        ],
+        causes: 'Nấm Asperisporium guavas, độ ẩm cao, nhiệt độ 23-28°C',
+        treatment: [
+            'Phun Mancozeb 80% WP 3g/lít',
+            'Phun Carbendazim 1g/lít',
+            'Loại bỏ quả bệnh'
+        ],
+        prevention: [
+            'Tỉa cành để giảm độ ẩm',
+            'Tránh tưới lên quả',
+            'Thu hoạch sớm'
+        ],
+        severity: 'Cao',
+        economicImpact: 'Giảm 50-70% chất lượng quả'
+    },
+
+    // ============ POMEGRANATE DISEASES (LựU) ============
+    'Bệnh sương muối trên lựu': {
+        keywords: ['sương muối', 'sooty blotch', 'pomegranate', 'alternaria', 'lựu'],
+        aliases: ['Tấy đen', 'Sương muối'],
+        confidence: 0.83,
+        commonNames: ['Sooty Blotch on Pomegranate'],
+        affectedCrops: ['Lựu', 'Xoài'],
+        symptoms: [
+            'Đốm đen mờ trên quả',
+            'Quả giống như bước đi qua tro',
+            'Lá cũng có đốm đen mờ',
+            'Không ảnh hưởng đến vị nhưng ảnh hưởng thẩm mỹ'
+        ],
+        causes: 'Nấm Alternaria, độ ẩm cao, nhiệt độ 25-30°C',
+        treatment: [
+            'Phun Chlorothalonil 72% SC 2ml/lít',
+            'Phun Mancozeb 80% WP 3g/lít',
+            'Thoáng gió để giảm độ ẩm'
+        ],
+        prevention: [
+            'Tỉa cành thường xuyên',
+            'Tránh bón nitơ quá nhiều',
+            'Duy trì độ ẩm 60-70%'
+        ],
+        severity: 'Trung bình',
+        economicImpact: 'Giảm 20-30% giá trị thương phẩm'
+    },
+
+    // ============ APPLE DISEASES (TÁO) ============
+    'Bệnh scab trên táo': {
+        keywords: ['scab táo', 'apple scab', 'venturia inaequalis', 'lỏi táo', 'táo'],
+        aliases: ['Lỏi', 'Bệnh scab'],
+        confidence: 0.88,
+        commonNames: ['Apple Scab'],
+        affectedCrops: ['Táo', 'Lê'],
+        symptoms: [
+            'Lá có các vệ xám nâu',
+            'Quả bị lỏi, dàng dề',
+            'Quả bị nứt ra',
+            'Lá sẽ vàng rồi rụng'
+        ],
+        causes: 'Nấm Venturia inaequalis, độ ẩm 90%, nhiệt độ 7-24°C',
+        treatment: [
+            'Phun Carbendazim 1g/lít',
+            'Phun Sulfur 80% WP 2g/lít',
+            'Loại bỏ quả bệnh'
+        ],
+        prevention: [
+            'Chọn giống kháng bệnh',
+            'Tỉa cành để thoáng gió',
+            'Tiêu hủy lá rụng'
+        ],
+        severity: 'Cao',
+        economicImpact: 'Giảm 40-60% chất lượng quả'
+    },
+
+    // ============ COCONUT DISEASES (DỪA) ============
+    'Bệnh lá vàng trên dừa': {
+        keywords: ['lá vàng dừa', 'coconut leaf scorch', 'phomopsis', 'yellow leaf', 'dừa'],
+        aliases: ['Lá vàng', 'Héo lá'],
+        confidence: 0.8,
+        commonNames: ['Coconut Leaf Scorch'],
+        affectedCrops: ['Dừa'],
+        symptoms: [
+            'Lá ngắn nhất trên đỉnh vàng trước',
+            'Dần dần các lá khác cũng vàng',
+            'Lá héo, cây không sinh trưởng',
+            'Có thể dẫn đến chết cây'
+        ],
+        causes: 'Vi khuẩn hoặc nấm Phomopsis, tác động stress nước',
+        treatment: [
+            'Tưới nước đúng lúc',
+            'Phun Carbendazim định kỳ',
+            'Cắt lá bệnh để giảm bớt'
+        ],
+        prevention: [
+            'Tưới nước đủ lượng',
+            'Bón phân cân bằng N-P-K',
+            'Cải thiện thoáng gió'
+        ],
+        severity: 'Rất cao',
+        economicImpact: 'Có thể làm cây chết nếu không xử lý'
     }
 };
 

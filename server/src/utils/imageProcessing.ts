@@ -1,4 +1,4 @@
-import { ImageData } from '../types';
+import { ImageData } from '../types.js';
 
 export async function preprocessImage(data: ImageData): Promise<Buffer> {
     try {

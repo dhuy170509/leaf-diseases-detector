@@ -1,9 +1,13 @@
-import { ImageData } from '../types';
-import imageProcessing from '../utils/imageProcessing';
+import { ImageData } from '../types.js';
+import imageProcessing from '../utils/imageProcessing.js';
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Cache for loaded model
 let cachedModel: any = null;

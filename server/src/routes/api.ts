@@ -1,11 +1,16 @@
 import express from 'express';
 import multer from 'multer';
-import { predictController } from '../controllers/predictController';
-import weatherService from '../services/weatherService';
-import modelPerformanceService from '../services/modelPerformanceService';
-import bestLeafAIService from '../services/bestLeafAIService';
+import { predictController } from '../controllers/predictController.js';
+import weatherService from '../services/weatherService.js';
+import modelPerformanceService from '../services/modelPerformanceService.js';
+import bestLeafAIService from '../services/bestLeafAIService.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const router = express.Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configure multer for image uploads
 const upload = multer({
@@ -182,7 +187,7 @@ router.get('/models/weights', async (req, res) => {
 router.post('/predict-h5', upload.single('image'), async (req, res) => {
     const startTime = Date.now();
     try {
-        const { predictWithH5Safe, formatPredictionResult } = await import('../services/efficientNetH5Service');
+        const { predictWithH5Safe, formatPredictionResult } = await import('../services/efficientNetH5Service.js');
 
         // Check image
         if (!req.file) {
@@ -242,7 +247,7 @@ router.post('/predict-h5', upload.single('image'), async (req, res) => {
 router.post('/predict-plant', upload.single('image'), async (req, res) => {
     const startTime = Date.now();
     try {
-        const { predictWithPlantModelSafe, formatPlantModelResult } = await import('../services/plantModelH5Service');
+        const { predictWithPlantModelSafe, formatPlantModelResult } = await import('../services/plantModelH5Service.js');
 
         // Check image
         if (!req.file) {
@@ -302,7 +307,7 @@ router.post('/predict-plant', upload.single('image'), async (req, res) => {
 router.post('/predict-mango', upload.single('image'), async (req, res) => {
     const startTime = Date.now();
     try {
-        const { predictWithMangoModelSafe, formatMangoModelResult } = await import('../services/mangoModelH5Service');
+        const { predictWithMangoModelSafe, formatMangoModelResult } = await import('../services/mangoModelH5Service.js');
 
         // Check image
         if (!req.file) {

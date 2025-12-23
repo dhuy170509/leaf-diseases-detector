@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { predictImage } from '../services/modelService';
-import { generateDetailedAnalysis, formatAnalysisReport } from '../services/analysisService';
-import databaseService from '../services/databaseService';
-import { predictWithEnsemble } from '../services/mlModelsService';
+import { predictImage } from '../services/modelService.js';
+import { generateDetailedAnalysis, formatAnalysisReport } from '../services/analysisService.js';
+import databaseService from '../services/databaseService.js';
+import mlModelsServiceV2 from '../services/mlModelsService-v2.js';
+import { getDiseaseInfo } from '../data/diseaseDatabase.js';
 
 export const predictController = async (req: Request, res: Response) => {
     const startTime = Date.now();
@@ -15,19 +16,18 @@ export const predictController = async (req: Request, res: Response) => {
             });
         }
 
-        // Lấy các tùy chỉnh từ request
+        // Get options from request
         const plantPart = req.body.plantPart || 'leaves';
         const validParts = ['leaves', 'stem', 'root', 'flower', 'fruit', 'whole'];
         const selectedPart = validParts.includes(plantPart) ? plantPart : 'leaves';
 
-        // Tùy chỉnh phân tích
-        const environmentalCondition = req.body.environmentalCondition || 'normal'; // normal, humid, dry, hot, cold
-        const diseaseHistory = req.body.diseaseHistory || 'none'; // none, past, current, recurring
+        const environmentalCondition = req.body.environmentalCondition || 'normal';
+        const diseaseHistory = req.body.diseaseHistory || 'none';
         const treatmentAttempted = req.body.treatmentAttempted || 'none';
-        const urgencyLevel = req.body.urgencyLevel || 'normal'; // low, normal, urgent, critical
+        const urgencyLevel = req.body.urgencyLevel || 'normal';
         const region = req.body.region || 'unknown';
 
-        console.log(`🌿 Phân tích bộ phận: ${selectedPart} | Điều kiện: ${environmentalCondition} | Mức độ khẩn cấp: ${urgencyLevel}`);
+        console.log(`🌿 Plant part: ${selectedPart} | Condition: ${environmentalCondition} | Urgency: ${urgencyLevel}`);
 
         const imageData = {
             buffer: image,
@@ -41,17 +41,16 @@ export const predictController = async (req: Request, res: Response) => {
             region
         };
 
-        // Run ensemble prediction with 3 AI models
-        console.log('🤖 Running ensemble prediction with ResNet50, MobileNetV2, InceptionV3...');
-        const ensemblePrediction = await predictWithEnsemble(image);
+        // Run prediction using adaptive model manager
+        console.log('🤖 Running prediction with Model Manager...');
+        const ensemblePrediction = await mlModelsServiceV2.predictWithEnsemble(image);
 
-        console.log('✅ Ensemble voting complete:');
-        console.log(`   Final disease: ${ensemblePrediction.finalDisease}`);
-        console.log(`   Final confidence: ${(ensemblePrediction.finalConfidence * 100).toFixed(1)}%`);
+        console.log('✅ Prediction complete:');
+        console.log(`   Disease: ${ensemblePrediction.finalDisease}`);
+        console.log(`   Confidence: ${(ensemblePrediction.finalConfidence * 100).toFixed(1)}%`);
         console.log(`   Severity: ${ensemblePrediction.severity}`);
-        console.log(`   Unanimous vote: ${ensemblePrediction.votingDetails.unanimousVote ? 'Yes' : 'Models disagreed'}`);
+        console.log(`   Model Used: ${ensemblePrediction.votingDetails.modelUsed}`);
 
-        // Thu thập metadata cho database
         const metadata = {
             filename: imageData.filename,
             contentType: imageData.contentType,
@@ -64,15 +63,14 @@ export const predictController = async (req: Request, res: Response) => {
             region
         };
 
-        console.log(`Processing image: ${imageData.filename} (${imageData.contentType})`);
+        console.log(`Processing image: ${imageData.filename} (${imageData.contentType}`);
 
         const predictionResponse = (await predictImage(imageData)) as any;
         const prediction = predictionResponse.prediction || predictionResponse;
         const processingTime = Date.now() - startTime;
 
-        console.log('📤 Server response structure:', {
+        console.log('📤 Response structure:', {
             hasPrediction: !!predictionResponse.prediction,
-            predictionKeys: Object.keys(prediction || {}).slice(0, 5),
             diseaseName: prediction?.prediction,
             confidence: prediction?.confidence
         });
@@ -89,6 +87,9 @@ export const predictController = async (req: Request, res: Response) => {
 
         const analysisFormatted = formatAnalysisReport(detailedAnalysis);
 
+        // Get detailed disease information from database
+        const diseaseInfo = getDiseaseInfo(prediction.prediction);
+
         const result = {
             success: true,
             prediction: {
@@ -96,6 +97,19 @@ export const predictController = async (req: Request, res: Response) => {
                 processingTime: processingTime,
                 detailedAnalysisReport: detailedAnalysis,
                 detailedAnalysisFormatted: analysisFormatted,
+                // Add disease information
+                diseaseInfo: diseaseInfo ? {
+                    name: prediction.prediction,
+                    aliases: diseaseInfo.aliases || [],
+                    commonNames: diseaseInfo.commonNames || [],
+                    symptoms: diseaseInfo.symptoms || [],
+                    causes: diseaseInfo.causes || '',
+                    treatment: diseaseInfo.treatment || [],
+                    prevention: diseaseInfo.prevention || [],
+                    severity: diseaseInfo.severity || 'Unknown',
+                    affectedCrops: diseaseInfo.affectedCrops || [],
+                    economicImpact: diseaseInfo.economicImpact || ''
+                } : null,
                 // Ensemble model data
                 ensembleData: {
                     finalDisease: ensemblePrediction.finalDisease,

@@ -3,12 +3,16 @@
  * Tích hợp model plant_disease_model.h5 đã được huấn luyện
  */
 
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import * as path from 'path';
-import * as fs from 'fs';
+import { exec } from 'node:child_process';
+import { promisify } from 'node:util';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 const execAsync = promisify(exec);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 interface PlantModelPrediction {
     label: string;
@@ -65,7 +69,8 @@ export async function predictWithPlantModel(imagePath: string): Promise<PlantMod
         let prediction: PlantModelPrediction;
 
         try {
-            const jsonMatch = stdout.match(/\{[\s\S]*\}/);
+            const jsonRegex = /\{[\s\S]*\}/;
+            const jsonMatch = jsonRegex.exec(stdout);
             if (!jsonMatch) {
                 throw new Error('No JSON output found');
             }
@@ -115,19 +120,22 @@ export async function predictWithPlantModelSafe(imagePath: string, maxRetries: n
  * Format prediction result cho frontend
  */
 export function formatPlantModelResult(prediction: PlantModelPrediction): any {
+    // Determine severity based on confidence
+    const determineSeverity = (confidence: number): string => {
+        if (confidence > 0.9) return 'CRITICAL';
+        if (confidence > 0.8) return 'SEVERE';
+        if (confidence > 0.7) return 'MODERATE';
+        if (confidence > 0.6) return 'MILD';
+        return 'SUSPECTED';
+    };
+
     return {
         success: true,
         disease: prediction.label,
         confidence: prediction.confidence,
         confidence_percent: `${(prediction.confidence * 100).toFixed(1)}%`,
         is_valid: prediction.is_valid,
-        severity: prediction.is_valid ? (
-            prediction.confidence > 0.9 ? 'CRITICAL' :
-                prediction.confidence > 0.8 ? 'SEVERE' :
-                    prediction.confidence > 0.7 ? 'MODERATE' :
-                        prediction.confidence > 0.6 ? 'MILD' :
-                            'SUSPECTED'
-        ) : 'UNKNOWN',
+        severity: prediction.is_valid ? determineSeverity(prediction.confidence) : 'UNKNOWN',
         topk_predictions: prediction.topk.map((p, idx) => ({
             rank: idx + 1,
             disease: p.label,

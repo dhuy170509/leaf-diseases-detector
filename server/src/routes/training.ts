@@ -3,9 +3,12 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
 
 const router = express.Router();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // Configure multer for training data
 const trainingDataDir = path.join(__dirname, '../../..', 'training_data');
 fs.mkdirSync(trainingDataDir, { recursive: true });
@@ -39,8 +42,8 @@ let trainingProgress = {
     status: 'idle',
     model: '',
     progress: 0,
-    startTime: null,
-    estimatedTime: null
+    startTime: null as number | null,
+    estimatedTime: null as number | null
 };
 
 /**
@@ -116,8 +119,8 @@ router.post('/retrain', async (req, res) => {
             status: 'starting',
             model: 'all',
             progress: 0,
-            startTime: Date.now(),
-            estimatedTime: epochs * 60000 // Rough estimate: 1 min per epoch
+            startTime: Date.now() as number,
+            estimatedTime: (epochs * 60000) as number // Rough estimate: 1 min per epoch
         };
 
         console.log(`\n🚀 Starting model retraining...`);

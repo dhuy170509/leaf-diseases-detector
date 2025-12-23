@@ -4,14 +4,19 @@ import cors from 'cors';
 import multer from 'multer';
 import path from 'path';
 import { networkInterfaces } from 'os';
-import apiRoutes from './routes/api';
-import cropsRoutes from './routes/crops';
-import weatherRoutes from './routes/weather';
-import chatbotRoutes from './routes/chatbot';
-import trainingRoutes from './routes/training';
-import openaiService from './services/openaiService';
-import diseaseService from './services/diseaseService';
-import { initDatabase } from './services/databaseService';
+import { fileURLToPath } from 'url';
+import apiRoutes from './routes/api.js';
+import cropsRoutes from './routes/crops.js';
+import weatherRoutes from './routes/weather.js';
+import chatbotRoutes from './routes/chatbot.js';
+import trainingRoutes from './routes/training.js';
+import openaiService from './services/openaiService.js';
+import diseaseService from './services/diseaseService.js';
+import { initDatabase } from './services/databaseService.js';
+
+// Get directory name (compatible with commonjs)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = Number.parseInt(process.env.PORT || '8765', 10);

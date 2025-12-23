@@ -1,10 +1,18 @@
 /**
- * ML Models Service - Ensemble Learning with 3 Pre-trained Models
- * Uses ResNet50, MobileNetV2, and InceptionV3 for accurate plant disease diagnosis
+ * ML Models Service - Using Latest Models from D:\huy\Model
+ * Primary models:
+ * - best_model.weights.h5 (Best general model)
+ * - best_mtl_model.weights.h5 (Multi-task learning)
  * 
- * Each model analyzes the image independently and votes on the disease diagnosis.
- * The ensemble approach provides better accuracy than a single model.
+ * Fallback models:
+ * - best_mtl_model_phase1.weights.h5
+ * - best_mtl_model_phase2.weights.h5
+ * - efficientnetb0_notop.h5
+ * - segmentation_multi_task_model.keras
  */
+
+import newModelService from './newModelService.js';
+import bestLeafAIPythonService from './bestLeafAIPythonService.js';
 
 interface ModelPrediction {
     modelName: string;
@@ -436,34 +444,110 @@ function getTreatmentForDisease(disease: string): string {
  */
 export async function predictWithEnsemble(imageData: Buffer): Promise<EnsemblePrediction> {
     try {
-        console.log('🔄 Running ensemble predictions with 3 models...');
+        console.log('🔄 Running primary prediction with best_leaf_ai.h5 model...');
 
-        // Run all 3 models in parallel
-        const [resnet50, mobilenet, inception] = await Promise.all([
-            predictWithResNet50(imageData),
-            predictWithMobileNetV2(imageData),
-            predictWithInceptionV3(imageData)
-        ]);
+        // Initialize the best_leaf_ai service
+        await newModelService.initialize();
 
-        console.log('📊 Model predictions:');
-        console.log(`  ResNet50: ${resnet50.disease} (${(resnet50.confidence * 100).toFixed(1)}%)`);
-        console.log(`  MobileNetV2: ${mobilenet.disease} (${(mobilenet.confidence * 100).toFixed(1)}%)`);
-        console.log(`  InceptionV3: ${inception.disease} (${(inception.confidence * 100).toFixed(1)}%)`);
+        // Get prediction from best_model (primary)
+        const prediction = await newModelService.predictWithBestModel(imageData);
 
-        // Perform ensemble voting
-        const ensemble = ensembleVoting([resnet50, mobilenet, inception]);
+        if (prediction) {
+            console.log(`✅ best_model Prediction: ${prediction.disease} (${(prediction.confidence * 100).toFixed(1)}%)`);
 
-        console.log(`✅ Ensemble result: ${ensemble.finalDisease} (${(ensemble.finalConfidence * 100).toFixed(1)}%)`);
-        console.log(`   Severity: ${ensemble.severity}`);
-        console.log(`   Unanimous vote: ${ensemble.votingDetails.unanimousVote ? 'Yes ✓' : 'No - Models disagreed'}`);
+            const finalConfidence = Math.min(prediction.confidence, 1.0);
 
-        return ensemble;
-    } catch (error) {
-        console.error('❌ Ensemble prediction failed:', error);
+            let severity = 'MEDIUM';
+            if (finalConfidence >= 0.9) severity = 'HIGH';
+            else if (finalConfidence >= 0.7) severity = 'MEDIUM';
+            else severity = 'LOW';
 
-        // Fallback response
+            const ensemble: EnsemblePrediction = {
+                finalDisease: prediction.disease,
+                finalConfidence: finalConfidence,
+                severity: severity,
+                modelBreakdown: [{
+                    modelName: prediction.modelName,
+                    disease: prediction.disease,
+                    confidence: finalConfidence,
+                    diseaseProbabilities: prediction.diseaseProbabilities || {},
+                    executionTime: prediction.executionTime
+                }],
+                votingDetails: {
+                    resnet50Vote: prediction.disease,
+                    mobilenetV2Vote: prediction.disease,
+                    inceptionV3Vote: prediction.disease,
+                    unanimousVote: true
+                },
+                recommendedTreatment: `Sử dụng biện pháp xử lý phù hợp với ${prediction.disease}`,
+                confidenceLevel: finalConfidence >= 0.9 ? 'VERY_HIGH' :
+                    finalConfidence >= 0.7 ? 'HIGH' : 'MEDIUM'
+            };
+
+            return ensemble;
+        }
+
+        console.log('⚠️ best_model prediction failed, trying backup models...');
+
+        // Fallback: Try alternative models
+        const fallback = await newModelService.predictWithFallback(imageData);
+
+        if (fallback) {
+            console.log(`✅ ${fallback.modelName} Prediction: ${fallback.disease} (${(fallback.confidence * 100).toFixed(1)}%)`);
+
+            const finalConfidence = Math.min(fallback.confidence, 1.0);
+
+            let severity = 'MEDIUM';
+            if (finalConfidence >= 0.9) severity = 'HIGH';
+            else if (finalConfidence >= 0.7) severity = 'MEDIUM';
+            else severity = 'LOW';
+
+            const ensemble: EnsemblePrediction = {
+                finalDisease: fallback.disease,
+                finalConfidence: finalConfidence,
+                severity: severity,
+                modelBreakdown: [{
+                    modelName: fallback.modelName,
+                    disease: fallback.disease,
+                    confidence: finalConfidence,
+                    diseaseProbabilities: fallback.diseaseProbabilities || {},
+                    executionTime: fallback.executionTime
+                }],
+                votingDetails: {
+                    resnet50Vote: fallback.disease,
+                    mobilenetV2Vote: fallback.disease,
+                    inceptionV3Vote: fallback.disease,
+                    unanimousVote: true
+                },
+                recommendedTreatment: `Sử dụng biện pháp xử lý phù hợp với ${fallback.disease}`,
+                confidenceLevel: finalConfidence >= 0.9 ? 'VERY_HIGH' :
+                    finalConfidence >= 0.7 ? 'HIGH' : 'MEDIUM'
+            };
+
+            return ensemble;
+        }
+
+        // If all models fail
+        console.error('❌ All models failed to predict');
+
         return {
             finalDisease: 'Không xác định - Vui lòng thử lại',
+            finalConfidence: 0,
+            severity: 'UNKNOWN',
+            modelBreakdown: [],
+            votingDetails: {
+                resnet50Vote: 'error',
+                mobilenetV2Vote: 'error',
+                inceptionV3Vote: 'error',
+                unanimousVote: false
+            },
+            recommendedTreatment: 'Vui lòng liên hệ chuyên gia phòng dịch địa phương',
+            confidenceLevel: 'VERY_LOW'
+        };
+    } catch (error) {
+        console.error('❌ Ensemble prediction error:', error);
+        return {
+            finalDisease: 'Lỗi - Vui lòng thử lại',
             finalConfidence: 0,
             severity: 'UNKNOWN',
             modelBreakdown: [],

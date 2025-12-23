@@ -7,10 +7,10 @@ type ImageData = {
   plantPart?: string;
 };
 
-import { VIETNAMESE_DISEASE_DB, getDiseasesByCrop } from '../data/vietnamDiseaseDatabase';
-import { detectCrop, getCropInfo } from './cropDetectionService';
-import { generateDeepDiagnosis, formatDeepDiagnosis } from './diagnosisService';
-import { analyzeImagePixelByPixel } from './pixelAnalysisService';
+import { VIETNAMESE_DISEASE_DB, getDiseasesByCrop } from '../data/vietnamDiseaseDatabase.js';
+import { detectCrop, getCropInfo } from './cropDetectionService.js';
+import { generateDeepDiagnosis, formatDeepDiagnosis } from './diagnosisService.js';
+import { analyzeImagePixelByPixel } from './pixelAnalysisService.js';
 
 // Analyze image visual features (colors, patterns)
 const analyzeImageVisualFeatures = (buffer: Buffer): { colorDistribution: any, anomalyScore: number, cropLikelihood: { [key: string]: number } } => {

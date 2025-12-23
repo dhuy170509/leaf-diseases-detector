@@ -4,7 +4,7 @@
  */
 
 import express, { Request, Response } from 'express';
-import chatbotService from '../services/chatbotService';
+import chatbotService from '../services/chatbotService.js';
 
 const router = express.Router();
 

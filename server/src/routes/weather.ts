@@ -4,7 +4,7 @@
  */
 
 import express, { Request, Response } from 'express';
-import { getWeatherForecast, detectLocationFromIP } from '../services/weatherService';
+import { getWeatherForecast, detectLocationFromIP } from '../services/weatherService.js';
 
 const router = express.Router();
 
@@ -21,9 +21,9 @@ router.get('/', async (req: Request, res: Response) => {
         }
 
         const forecast = await getWeatherForecast(
-            parseFloat(lat as string),
-            parseFloat(lon as string),
-            days ? parseInt(days as string) : 3
+            Number.parseFloat(lat as string),
+            Number.parseFloat(lon as string),
+            days ? Number.parseInt(days as string) : 3
         );
 
         res.json({
@@ -68,9 +68,9 @@ router.get('/forecast', async (req: Request, res: Response) => {
         }
 
         const forecast = await getWeatherForecast(
-            parseFloat(lat as string),
-            parseFloat(lon as string),
-            days ? parseInt(days as string) : 5
+            Number.parseFloat(lat as string),
+            Number.parseFloat(lon as string),
+            days ? Number.parseInt(days as string) : 5
         );
 
         res.json({

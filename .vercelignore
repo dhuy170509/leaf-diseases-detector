@@ -1,0 +1,9 @@
+# ignore server build artifacts, large model files and local env
+server/dist/
+server/node_modules/
+models/
+model/
+*.h5
+*.sqlite
+.env
+*.env.*

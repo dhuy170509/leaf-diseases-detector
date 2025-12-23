@@ -4,7 +4,7 @@
  */
 
 import express, { Request, Response } from 'express';
-import cropService from '../services/cropService';
+import cropService from '../services/cropService.js';
 
 const router = express.Router();
 

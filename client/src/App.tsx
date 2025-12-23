@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import ImageUploader from './components/ImageUploader';
 import CropManagement from './components/CropManagement';
 import Chatbot from './components/Chatbot';
+import TrainingPanel from './components/TrainingPanel';
 import './styles/main.css';
+import './styles/training.css';
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'prediction' | 'crops'>('prediction');
+  const [activeTab, setActiveTab] = useState<'prediction' | 'crops' | 'training'>('prediction');
 
   return (
     <div className="App">
@@ -27,6 +29,12 @@ const App: React.FC = () => {
         >
           🌱 Quản lý cây
         </button>
+        <button
+          className={`tab-btn ${activeTab === 'training' ? 'active' : ''}`}
+          onClick={() => setActiveTab('training')}
+        >
+          🤖 Huấn luyện AI
+        </button>
       </nav>
 
       <main className="app-main">
@@ -38,6 +46,11 @@ const App: React.FC = () => {
         {activeTab === 'crops' && (
           <div className="tab-content">
             <CropManagement />
+          </div>
+        )}
+        {activeTab === 'training' && (
+          <div className="tab-content">
+            <TrainingPanel />
           </div>
         )}
       </main>

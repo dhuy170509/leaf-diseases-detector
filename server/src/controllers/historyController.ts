@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import databaseService from '../services/databaseService';
+import databaseService from '../services/databaseService.js';
 
 /**
  * Lấy lịch sử dự đoán

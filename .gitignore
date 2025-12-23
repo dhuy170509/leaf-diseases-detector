@@ -22,3 +22,4 @@ cloudflared.exe
 *.db
 database/disease_detector.db
 
+.env

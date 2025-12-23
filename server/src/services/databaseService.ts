@@ -1,8 +1,11 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 
 // Database configuration
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const DB_PATH = path.resolve(__dirname, '../../../database/disease_detector.db');
 const SCHEMA_PATH = path.resolve(__dirname, '../../../database/schema.sql');
 
