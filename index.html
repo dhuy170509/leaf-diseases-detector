@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Chẩn đoán Bệnh Lá</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script type="module" src="./main.js" defer></script>
+</head>
+
+<body>
+    <div class="bg"></div>
+    <div class="orbs">
+        <div class="orb orb1" data-speed="0.6"></div>
+        <div class="orb orb2" data-speed="0.9"></div>
+        <div class="orb orb3" data-speed="1.2"></div>
+    </div>
+    <main class="shell">
+        <header class="hero">
+            <div>
+                <p class="eyebrow">Agri AI • Mobile-first</p>
+                <h1>Chụp lá &amp; nhận diện bệnh tức thì</h1>
+                <p class="sub">ViT HuggingFace chạy 100% trên trình duyệt. Không backend. Không API key.</p>
+                <div class="chips">
+                    <span class="pill pill-strong">WebGPU/WebGL tăng tốc</span>
+                    <span class="pill pill-soft" id="offlineBadge">Offline sau khi tải</span>
+                </div>
+            </div>
+            <div class="hero-actions">
+                <button id="historyBtn" class="ghost" data-ripple>Lịch sử</button>
+            </div>
+        </header>
+
+        <section class="grid">
+            <div class="card drop" id="dropZone">
+                <div class="drop-inner">
+                    <div class="icon">📷</div>
+                    <p class="title">Kéo thả, chạm hoặc bật camera</p>
+                    <p class="muted">Hỗ trợ quay/chụp môi trường</p>
+                    <div class="row-flex" style="gap:12px; align-items:center;">
+                        <label for="cropSelect" class="label">Chọn cây</label>
+                        <select id="cropSelect" class="select"></select>
+                        <span id="serverStatus" class="pill pill-muted">Đang kiểm tra server...</span>
+                    </div>
+                    <input id="fileInput" type="file" accept="image/*" capture="environment" hidden />
+                    <div class="progress" id="progress">
+                        <div class="bar" id="progressBar"></div>
+                    </div>
+                    <p class="progress-status" id="progressStatus">Chưa chạy</p>
+                    <div class="ring" id="ring" hidden>
+                        <svg viewBox="0 0 120 120">
+                            <circle class="track" cx="60" cy="60" r="54" />
+                            <circle id="ringIndicator" class="indicator" cx="60" cy="60" r="54" />
+                        </svg>
+                        <span class="ring-text" id="ringText">Đang quét...</span>
+                    </div>
+                    <video id="liveVideo" class="live-video" autoplay muted playsinline hidden></video>
+                    <div class="row-flex" style="gap:10px; flex-wrap:wrap;">
+                        <button class="ghost" id="cameraBtn" data-ripple>Bật camera trực tiếp</button>
+                        <button class="primary" id="captureBtn" data-ripple hidden>Chụp &amp; chẩn đoán</button>
+                    </div>
+                    <button class="primary" id="selectBtn" data-ripple>Chọn / Chụp ảnh</button>
+                </div>
+            </div>
+
+            <div class="card preview result-card" id="resultCard">
+                <div class="card-head">
+                    <span class="pill pill-soft">Xem trước</span>
+                    <span id="statusBadge" class="pill pill-muted">Chưa có ảnh</span>
+                </div>
+                <div id="preview" class="preview-area">
+                    <div class="scan-line" id="scanLine"></div>
+                    <img id="heatmapOverlay" class="heatmap-overlay" hidden />
+                    <p class="muted">Chưa có ảnh</p>
+                </div>
+                <div class="result">
+                    <div class="row"><span class="label">Cây trồng</span><span class="value" id="crop">-</span></div>
+                    <div class="row"><span class="label">Bệnh</span><span class="value big" id="disease">-</span></div>
+                    <div class="row"><span class="label">Độ tin cậy</span><span class="value" id="confidence">-</span>
+                    </div>
+                    <div class="row"><span class="label">Độ tin cậy hiệu chuẩn</span><span class="value"
+                            id="reliabilityScore">-</span>
+                    </div>
+                    <div class="row"><span class="label">Trạng thái tự kiểm</span><span class="value"
+                            id="reliabilityStatus">-</span>
+                    </div>
+                    <div class="row"><span class="label">Mức độ</span><span class="value" id="severity">-</span></div>
+                </div>
+                <div class="validators" id="validatorsBlock">
+                    <p class="section-title">Trình xác thực</p>
+                    <ul id="validatorList" class="list compact"></ul>
+                    <div id="rejectReason" class="alert" hidden></div>
+                </div>
+                <div class="top3">
+                    <p class="section-title">Top-3 dự đoán</p>
+                    <ul id="top3List" class="list compact"></ul>
+                </div>
+                <div class="cta-row">
+                    <button class="ghost" id="shareBtn" data-ripple>Chia sẻ</button>
+                    <button class="ghost" id="pdfBtn" data-ripple>Tải PDF</button>
+                </div>
+            </div>
+
+            <div class="card info">
+                <div class="card-head"><span class="pill pill-strong">Xử lý &amp; Phòng ngừa</span></div>
+                <div>
+                    <p class="section-title">Thuốc/Hoạt chất</p>
+                    <ul id="chemList" class="list"></ul>
+                </div>
+                <div>
+                    <p class="section-title">Hữu cơ / Xử lý</p>
+                    <ul id="treatList" class="list"></ul>
+                </div>
+                <div>
+                    <p class="section-title">Phòng ngừa</p>
+                    <ul id="prevList" class="list"></ul>
+                </div>
+            </div>
+
+            <div class="card health">
+                <div class="card-head"><span class="pill pill-soft">Giám sát hệ thống</span></div>
+                <div class="health-row">
+                    <p class="section-title">Trạng thái model</p>
+                    <ul id="healthModelList" class="status-list"></ul>
+                </div>
+                <div class="health-row">
+                    <p class="section-title">FPS</p>
+                    <div class="meter" id="fpsMeter">
+                        <div class="meter-fill" id="fpsFill"></div>
+                        <span class="meter-label" id="fpsLabel">- fps</span>
+                    </div>
+                </div>
+                <div class="health-row">
+                    <p class="section-title">Bộ nhớ</p>
+                    <div class="meter" id="memMeter">
+                        <div class="meter-fill" id="memFill"></div>
+                        <span class="meter-label" id="memLabel">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card history" id="historyCard" hidden>
+                <div class="card-head">
+                    <span class="pill pill-soft">Lịch sử</span>
+                    <div class="history-actions">
+                        <button class="ghost" id="clearHistory" data-ripple>Xóa</button>
+                    </div>
+                </div>
+                <ul id="historyList" class="history-list"></ul>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

@@ -31,66 +31,7 @@ interface MangoModelPrediction {
  * Dự đoán hình ảnh bằng Mango Disease Model
  */
 export async function predictWithMangoModel(imagePath: string): Promise<MangoModelPrediction> {
-    try {
-        // Kiểm tra file model
-        const modelPath = path.join(__dirname, '../../model/mango_model.h5');
-
-        if (!fs.existsSync(modelPath)) {
-            throw new Error(`Mango model file not found: ${modelPath}`);
-        }
-
-        // Kiểm tra file ảnh
-        if (!fs.existsSync(imagePath)) {
-            throw new Error(`Image file not found: ${imagePath}`);
-        }
-
-        // Đường dẫn script Python
-        const scriptPath = path.join(__dirname, '../../model/predict_h5.py');
-        const diseaseInfoPath = path.join(__dirname, '../../models/disease_info.json');
-
-        // Tạo command
-        let command = `python "${scriptPath}" --model "${modelPath}" --image "${imagePath}" --json-output`;
-
-        if (fs.existsSync(diseaseInfoPath)) {
-            command += ` --disease-info "${diseaseInfoPath}"`;
-        }
-
-        console.log('🔍 Đang dự đoán với Mango Disease Model...');
-        console.log(`   Image: ${imagePath}`);
-        console.log(`   Model: ${modelPath}`);
-
-        // Execute Python script
-        const { stdout, stderr } = await execAsync(command, {
-            timeout: 30000,
-            maxBuffer: 10 * 1024 * 1024
-        });
-
-        // Parse output
-        let prediction: MangoModelPrediction;
-
-        try {
-            const jsonRegex = /\{[\s\S]*\}/;
-            const jsonMatch = jsonRegex.exec(stdout);
-            if (!jsonMatch) {
-                throw new Error('No JSON output found');
-            }
-            prediction = JSON.parse(jsonMatch[0]);
-        } catch (error) {
-            console.error('❌ Parse JSON error:', error);
-            console.error('   stdout:', stdout);
-            console.error('   stderr:', stderr);
-            throw error;
-        }
-
-        console.log('✅ Dự đoán thành công!');
-        console.log(`   Bệnh xoài: ${prediction.label}`);
-        console.log(`   Độ tin cậy: ${(prediction.confidence * 100).toFixed(1)}%`);
-
-        return prediction;
-    } catch (error) {
-        console.error('❌ Mango disease model prediction error:', error);
-        throw error;
-    }
+    throw new Error('Model support disabled (NO_MODEL_INSTALLED)');
 }
 
 /**

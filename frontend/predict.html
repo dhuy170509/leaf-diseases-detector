@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Predict • LeafGuard AI</title>
+    <link rel="stylesheet" href="/static/frontend/style.css">
+</head>
+
+<body>
+    <div class="main grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card">
+            <h2 class="section-title">Du doan benh</h2>
+            <p class="muted" id="lockMsg"></p>
+            <div class="grid">
+                <div>
+                    <div class="muted">Chon loai cay</div>
+                    <select id="cropSelect" class="input"></select>
+                </div>
+                <div>
+                    <div class="muted">Anh la/cay</div>
+                    <input id="fileInput" type="file" accept="image/*" class="input">
+                </div>
+                <button id="btnPredict">Predict</button>
+            </div>
+            <div id="hint" class="muted" style="margin-top:8px;">Keo tha anh vao o file cung duoc.</div>
+        </div>
+        <div class="card">
+            <h3 class="section-title">Ket qua</h3>
+            <div id="result" class="muted">Chua co ket qua.</div>
+        </div>
+    </div>
+    <script type="module">
+        const cropSelect = document.getElementById('cropSelect');
+        const resultEl = document.getElementById('result');
+        const lockMsg = document.getElementById('lockMsg');
+        async function loadStatus() {
+            const s = await fetch('/system_status').then(r => r.json());
+            if (s.system !== 'UNLOCKED') {
+                lockMsg.textContent = '❌ MODEL LOCKED – UNAVAILABLE';
+            } else {
+                lockMsg.textContent = '';
+            }
+            const models = await fetch('/models').then(r => r.json());
+            cropSelect.innerHTML = '';
+            models.filter(m => m.status === 'OK').forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.crop || m.name;
+                opt.textContent = m.crop || m.name;
+                cropSelect.append(opt);
+            });
+        }
+        async function predict() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) { alert('Chon anh'); return; }
+            const crop = cropSelect.value;
+            resultEl.textContent = 'Dang du doan...';
+            const form = new FormData();
+            form.append('file', file);
+            form.append('crop_name', crop);
+            const res = await fetch('/predict', { method: 'POST', body: form });
+            const data = await res.json();
+            if (!res.ok) {
+                resultEl.innerHTML = `<span class="badge badge-locked">Loi</span> ${data.detail || 'Model locked hoac loi'}`;
+                return;
+            }
+            resultEl.innerHTML = `
+        <div class="flex" style="gap:8px;">
+          <span class="badge badge-ok">${data.disease_name || 'Unknown'}</span>
+          <span class="muted">conf: ${(data.confidence * 100).toFixed(1)}%</span>
+        </div>
+        <div class="muted">Model: ${data.model_used}</div>
+        <div class="muted">Latency: ${data.processing_time_ms} ms</div>
+        <a href="/frontend/disease.html#${encodeURIComponent(data.disease_name || '')}">Xem chi tiet benh</a>
+      `;
+        }
+        document.getElementById('btnPredict').onclick = predict;
+        loadStatus();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Disease Info • LeafGuard</title>
+    <link rel="stylesheet" href="/static/frontend2/style.css">
+    <script type="module">
+        import { animateIn, registerReveal, initFloatingChat } from '/static/frontend2/app.js';
+        window.addEventListener('DOMContentLoaded', () => {
+            animateIn('.card');
+            registerReveal('.card, .accordion-item');
+            initFloatingChat({ apiEndpoint: '/chat', allowClientKey: false });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="navbar">
+        <div><strong>LeafGuard</strong></div>
+        <div class="nav-links">
+            <a href="/frontend2/index.html">Trang chủ</a>
+            <a href="/frontend2/predict.html">Dự đoán</a>
+            <a href="/frontend2/disease.html">Thư viện bệnh</a>
+            <a href="/frontend2/support.html">Hỗ trợ</a>
+        </div>
+    </div>
+    <div class="main" style="padding-top:90px;">
+        <div class="card">
+            <h2>Thư viện bệnh</h2>
+            <div class="accordion" id="acc"></div>
+        </div>
+        <div class="card carousel" style="margin-top:16px;">
+            <img id="carouselImg" src="https://picsum.photos/seed/leaf1/900/400" alt="" />
+            <div class="dots" id="dots"></div>
+        </div>
+    </div>
+    <script>
+        const diseases = [
+            { id: 'bacterial_spot', name: 'Bacterial Spot', crop: 'Tomato', severity: 'Trung binh', tips: 'Cat la benh, luan canh, dong goc.' },
+            { id: 'late_blight', name: 'Late Blight', crop: 'Potato', severity: 'Nang', tips: 'Thuoc goc mancozeb, loai bo tan du.' },
+        ];
+        const acc = document.getElementById('acc');
+        diseases.forEach(d => {
+            const item = document.createElement('div'); item.className = 'accordion-item';
+            item.innerHTML = `<div class="accordion-header">${d.name}<span class="muted">${d.crop}</span></div><div class="accordion-body">${d.tips}</div>`;
+            item.querySelector('.accordion-header').onclick = () => {
+                item.classList.toggle('active');
+            };
+            acc.append(item);
+        });
+        const imgs = [
+            'https://picsum.photos/seed/leaf1/900/400',
+            'https://picsum.photos/seed/leaf2/900/400',
+            'https://picsum.photos/seed/leaf3/900/400'
+        ];
+        const dots = document.getElementById('dots');
+        const imgEl = document.getElementById('carouselImg');
+        imgs.forEach((src, i) => {
+            const dot = document.createElement('div'); dot.className = 'dot' + (i === 0 ? ' active' : '');
+            dot.onclick = () => {
+                imgEl.src = src;
+                document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+                dot.classList.add('active');
+            };
+            dots.append(dot);
+        });
+    </script>
+</body>
+
+</html>

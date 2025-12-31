@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tải ảnh & Dự đoán - Agri AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+</head>
+
+<body class="min-h-screen bg-slate-950 text-slate-50">
+    <div class="gradient-bg"></div>
+    <div class="leaf-floats" aria-hidden="true">
+        <span class="leaf leaf-a"></span>
+        <span class="leaf leaf-b"></span>
+        <span class="leaf leaf-c"></span>
+        <span class="leaf leaf-d"></span>
+    </div>
+
+    <header class="fixed inset-x-0 top-0 z-30">
+        <div
+            class="mx-auto mt-4 flex max-w-6xl items-center justify-between rounded-full border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-2xl shadow-xl shadow-emerald-900/40">
+            <div class="flex items-center gap-3">
+                <a href="/"
+                    class="flex h-11 w-11 items-center justify-center rounded-full border border-emerald-300/40 bg-gradient-to-br from-emerald-400/30 to-cyan-300/30 text-xl">🌿</a>
+                <div>
+                    <div class="text-sm uppercase tracking-[0.24em] text-emerald-200">Agri AI</div>
+                    <div class="text-lg font-semibold">Tải ảnh & Dự đoán</div>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                <a href="/" class="nav-pill nav-underline">Trang chủ</a>
+                <a href="/feedback.html" class="nav-pill nav-underline">Feedback</a>
+                <span id="status" class="pill">Đang kiểm tra mô hình...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 mx-auto max-w-6xl space-y-12 px-4 pb-16 pt-32">
+        <section class="grid items-center gap-8 lg:grid-cols-[1.15fr,0.85fr]">
+            <div class="space-y-5 animate-on-scroll parallax" data-depth="10">
+                <p class="text-xs uppercase tracking-[0.25em] text-emerald-200">Multi-model · Local-first</p>
+                <h1 class="text-4xl font-extrabold leading-tight sm:text-5xl text-gradient">Chọn cây, tải ảnh lá, nhận
+                    kết quả</h1>
+                <p class="text-lg text-slate-200/90">Hỗ trợ Lúa, Ớt, Cà chua, Bí. Chuẩn hóa kích thước ảnh, tự động
+                    nhận diện mô hình, trả về heatmap & phác đồ xử lý.</p>
+                <div class="flex flex-wrap gap-3 text-sm text-emerald-100/90">
+                    <span class="pill">/predict</span>
+                    <span class="pill">/feedback</span>
+                    <span class="pill">/admin</span>
+                </div>
+            </div>
+            <div class="glass-panel glow-card space-y-4 p-6 animate-on-scroll">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <p class="eyebrow">Bước 1</p>
+                        <h3 class="text-xl font-semibold">Chọn cây trồng</h3>
+                    </div>
+                    <div class="pill">Multi-model</div>
+                </div>
+                <label class="floating-group">
+                    <select id="cropSelect" class="input-box w-full bg-slate-900/60">
+                        <option value="rice">Lúa</option>
+                        <option value="chili">Ớt</option>
+                        <option value="tomato">Cà chua</option>
+                        <option value="pumpkin">Bí ngô</option>
+                    </select>
+                    <span>Chọn loại cây</span>
+                </label>
+                <label class="floating-group">
+                    <select id="modelSelect" class="input-box w-full bg-slate-900/60">
+                        <option value="auto">Tự động (khuyến nghị)</option>
+                        <option value="cnn">CNN (độ chính xác cao)</option>
+                        <option value="dsvm">DSVM (nhanh, dữ liệu nhỏ)</option>
+                        <option value="dknn">DKNN (ổn định nhiễu)</option>
+                    </select>
+                    <span>Chọn mô hình</span>
+                </label>
+                <div class="text-sm text-slate-200/80">Mỗi cây có lớp bệnh riêng và mô hình gợi ý từ bài báo (CNN / DSVM
+                    /
+                    DKNN). Thiếu mô hình sẽ tự dùng heuristic an toàn.</div>
+            </div>
+        </section>
+
+        <section class="grid gap-6 lg:grid-cols-2">
+            <div class="glass-panel space-y-4 animate-on-scroll glow-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="eyebrow">Bước 2</p>
+                        <h3 class="text-xl font-semibold">Tải ảnh lá</h3>
+                    </div>
+                    <button id="resetBtn" class="pill">Làm mới</button>
+                </div>
+                <label for="fileInput" id="drop" class="upload-box">
+                    <div class="text-4xl">🌿</div>
+                    <div class="text-lg font-semibold">Chọn hoặc kéo thả ảnh</div>
+                    <p class="text-sm text-slate-200/70">Ảnh xử lý cục bộ, không gửi lên cloud.</p>
+                </label>
+                <input id="fileInput" type="file" accept="image/*" class="hidden" />
+                <div id="previewContainer" class="hidden overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                    <img id="preview" alt="Preview" class="max-h-80 w-full object-contain" />
+                </div>
+                <div class="progress-shell hidden" id="progressShell">
+                    <div class="progress-bar-inner" id="progressFill"></div>
+                </div>
+                <button id="predictBtn" class="primary-btn w-full" disabled>
+                    <span id="btnLabel">Phân tích ảnh</span>
+                    <span id="btnPulse" class="dot-pulse"></span>
+                </button>
+            </div>
+
+            <div class="glass-panel space-y-4 animate-on-scroll result-glow" id="resultCard">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="eyebrow">Bước 3</p>
+                        <h3 class="text-xl font-semibold">Kết quả tóm tắt</h3>
+                    </div>
+                    <a href="/feedback.html" class="pill">Gửi góp ý</a>
+                </div>
+                <div id="results" class="space-y-3">
+                    <div class="placeholder-card">Tải ảnh để xem kết quả.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-panel glow-card p-6 space-y-4 animate-on-scroll">
+            <div class="flex flex-wrap items-center justify-between">
+                <div>
+                    <p class="eyebrow">Hướng dẫn nhanh</p>
+                    <h3 class="section-title text-2xl">Lưu ý cho ảnh tải lên</h3>
+                </div>
+                <span class="pill">An toàn đầu vào</span>
+            </div>
+            <ul class="grid gap-3 md:grid-cols-2 text-sm text-slate-100">
+                <li class="info-card">Ảnh rõ nét, lá chiếm phần lớn khung hình.</li>
+                <li class="info-card">Tránh ánh sáng chói; nên chụp dưới bóng mát.</li>
+                <li class="info-card">Hỗ trợ JPG/PNG/WebP/BMP/GIF.</li>
+                <li class="info-card">Mọi ảnh được chuẩn hóa kích thước và tự động chuyển RGB.</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="border-t border-white/10 bg-slate-950/80 backdrop-blur-xl">
+        <div
+            class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-slate-300 md:flex-row md:items-center md:justify-between">
+            <div class="space-y-1">
+                <div>Agri AI SaaS · Flask · Multi-model (Rice/Chili/Tomato/Pumpkin)</div>
+                <div class="text-emerald-200">Facebook: https://www.facebook.com/17.th05.2009</div>
+                <div class="text-emerald-200">Zalo: Bùi Lê Đan Huy</div>
+                <div class="text-emerald-200">Phone: 0356162193 · Email: builedanhuygov@gmail.com</div>
+            </div>
+            <div class="flex flex-wrap gap-4">
+                <a class="hover:text-emerald-200" href="/predict.html">Trang kết quả</a>
+                <a class="hover:text-emerald-200" href="/feedback.html">Feedback</a>
+                <a class="hover:text-emerald-200" href="/admin.html">Admin</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/upload.js"></script>
+</body>
+
+</html>

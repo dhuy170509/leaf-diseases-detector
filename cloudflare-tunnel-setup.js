@@ -72,9 +72,10 @@ async function createTunnel() {
             }
         });
 
+        const accountIdPath = encodeURIComponent(CLOUDFLARE_ACCOUNT_ID);
         const options = {
             hostname: 'api.cloudflare.com',
-            path: `/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/cfd_tunnel`,
+            path: `/client/v4/accounts/${accountIdPath}/cfd_tunnel`,
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
@@ -113,9 +114,11 @@ async function createTunnel() {
 // Step 2: Get tunnel details
 async function getTunnelDetails(tunnelId) {
     return new Promise((resolve, reject) => {
+        const accountIdPath = encodeURIComponent(CLOUDFLARE_ACCOUNT_ID);
+        const tunnelIdPath = encodeURIComponent(tunnelId);
         const options = {
             hostname: 'api.cloudflare.com',
-            path: `/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/cfd_tunnel/${tunnelId}`,
+            path: `/client/v4/accounts/${accountIdPath}/cfd_tunnel/${tunnelIdPath}`,
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,

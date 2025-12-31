@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Dashboard • LeafGuard AI</title>
+    <link rel="stylesheet" href="/static/frontend/style.css">
+</head>
+
+<body>
+    <div class="main card">
+        <h2 class="section-title">Dashboard (demo)</h2>
+        <p class="muted">Can backend cung cap so lieu tu DB.</p>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Cay</th>
+                    <th>So du doan</th>
+                    <th>Top benh</th>
+                </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+        </table>
+    </div>
+    <script type="module">
+        fetch('/stats').then(r => r.json()).then(d => {
+            const rows = document.getElementById('rows');
+            d.by_crop.forEach(x => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${x.crop}</td><td>${x.count}</td><td>${x.top_disease || '-'}</td>`;
+                rows.append(tr);
+            });
+        }).catch(() => { document.getElementById('rows').innerHTML = '<tr><td colspan="3" class="muted">Chua co du lieu</td></tr>'; });
+    </script>
+</body>
+
+</html>

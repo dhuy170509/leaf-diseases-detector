@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Predict • LeafGuard</title>
+    <link rel="stylesheet" href="/static/frontend2/style.css">
+    <script type="module">
+        import { toast, bindDropzone, fetchJSON, animateIn, initDropdownSearch, registerReveal, initFloatingChat } from '/static/frontend2/app.js';
+
+        let lastPrediction = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const drop = document.querySelector('#dropZone');
+            const fileInput = document.querySelector('#fileInput');
+            bindDropzone(drop, fileInput);
+            drop.addEventListener('drop', () => updatePreview(fileInput.files[0]));
+            fileInput.addEventListener('change', () => updatePreview(fileInput.files[0]));
+            document.querySelector('#btnPredict').onclick = predict;
+            document.querySelector('#btnReset').onclick = resetForm;
+            document.querySelector('#btnReport').onclick = downloadReport;
+            registerReveal('.card');
+            initFloatingChat({ apiEndpoint: '/chat', allowClientKey: false });
+            loadModels();
+            animateIn('.card');
+        });
+
+        async function loadModels() {
+            try {
+                const models = await fetchJSON('/models');
+                const sel = document.querySelector('#cropSelect');
+                sel.innerHTML = '';
+                models.filter(m => m.status === 'OK').forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.crop || m.name; opt.textContent = m.crop || m.name; sel.append(opt);
+                });
+                const search = document.querySelector('#cropSearch');
+                initDropdownSearch(sel, search);
+            } catch (e) {
+                toast('Không đọc được danh sách model');
+            }
+        }
+
+        function updatePreview(file) {
+            const img = document.querySelector('#previewImg');
+            if (!file) { img.style.display = 'none'; img.src = ''; return; }
+            const reader = new FileReader();
+            reader.onload = e => { img.src = e.target.result; img.style.display = 'block'; };
+            reader.readAsDataURL(file);
+        }
+
+        async function predict() {
+            const file = document.querySelector('#fileInput').files[0];
+            if (!file) { toast('Chọn ảnh trước'); return; }
+            const crop = document.querySelector('#cropSelect').value;
+            const btn = document.querySelector('#btnPredict');
+            const bar = document.querySelector('#progressInner');
+            btn.disabled = true; btn.classList.add('loading'); bar.style.width = '30%';
+            const fd = new FormData(); fd.append('file', file); fd.append('crop_name', crop);
+            try {
+                const res = await fetch('/predict', { method: 'POST', body: fd });
+                bar.style.width = '70%';
+                const data = await res.json();
+                btn.disabled = false; btn.classList.remove('loading'); bar.style.width = '100%';
+                if (!res.ok) { toast(data.detail || 'Model đang khoá hoặc ảnh không hợp lệ'); return; }
+                lastPrediction = data;
+                renderResult(data);
+            } catch (e) {
+                btn.disabled = false; btn.classList.remove('loading'); bar.style.width = '0%';
+                toast('Lỗi dự đoán');
+            }
+        }
+
+        function renderResult(data) {
+            const name = data.disease_name || 'Không xác định';
+            const conf = Math.round((data.confidence || 0) * 100);
+            const severity = (data.severity || 'medium').toLowerCase();
+            const severityClass = severity === 'high' ? 'danger' : severity === 'low' ? '' : 'accent';
+            document.querySelector('#diseaseName').textContent = name;
+            document.querySelector('#summaryText').textContent = data.recommendation || 'Đang phân tích và tạo gợi ý...';
+
+            const severityEl = document.querySelector('#severityBadge');
+            severityEl.textContent = `Mức độ: ${severity}`;
+            severityEl.className = `pill-lg ${severityClass}`.trim();
+
+            document.querySelector('#cropTag').textContent = `Cây: ${data.crop_name || 'N/A'}`;
+            document.querySelector('#modelTag').textContent = `Model: ${data.model_used || '---'}`;
+            const confTag = document.querySelector('#confTag');
+            confTag.textContent = `Độ tin cậy: ${conf}%`;
+
+            const bar = document.querySelector('#reliabilityBar');
+            bar.style.width = `${conf}%`;
+            document.querySelector('#statusLine').textContent = `CNN: ${conf}% • ${data.processing_time_ms || '?'} ms`;
+        }
+
+        function resetForm() {
+            document.querySelector('#fileInput').value = '';
+            document.querySelector('#progressInner').style.width = '0%';
+            document.querySelector('#reliabilityBar').style.width = '0%';
+            updatePreview(null);
+            lastPrediction = null;
+            document.querySelector('#diseaseName').textContent = 'Chưa xác định';
+            document.querySelector('#summaryText').textContent = 'Tải ảnh lá, chọn cây và bấm Dự đoán để nhận gợi ý.';
+            document.querySelector('#severityBadge').className = 'pill-lg';
+            document.querySelector('#severityBadge').textContent = '-';
+            document.querySelector('#cropTag').textContent = 'Cây: -';
+            document.querySelector('#modelTag').textContent = 'Model: -';
+            document.querySelector('#confTag').textContent = 'Độ tin cậy: -';
+            document.querySelector('#statusLine').textContent = 'CNN: chờ dự đoán.';
+        }
+
+        function downloadReport() {
+            if (!lastPrediction) { toast('Chưa có báo cáo để tải'); return; }
+            const payload = {
+                disease: lastPrediction.disease_name,
+                confidence: lastPrediction.confidence,
+                model: lastPrediction.model_used,
+                latency_ms: lastPrediction.processing_time_ms,
+                recommendation: lastPrediction.recommendation,
+                timestamp: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'leafguard-report.json'; a.click();
+            URL.revokeObjectURL(url);
+            toast('Đã tải báo cáo JSON');
+        }
+    </script>
+</head>
+
+<body>
+    <div class="navbar">
+        <div><strong>LeafGuard</strong></div>
+        <div class="nav-links">
+            <a href="/frontend2/index.html">Trang chủ</a>
+            <a href="/frontend2/predict.html">Dự đoán</a>
+            <a href="/frontend2/disease.html">Thư viện bệnh</a>
+            <a href="/frontend2/admin.html">Quản trị</a>
+        </div>
+    </div>
+    <div class="main" style="padding-top:90px;">
+        <div class="page-hero">
+            <div class="hero-grid">
+                <div>
+                    <div class="pill-ghost" style="margin-bottom:8px;">🔬 Predict • Local-first</div>
+                    <h1 class="display-title" style="font-size:32px; margin:4px 0 8px 0;">Phòng lab chẩn đoán lá</h1>
+                    <p class="muted" style="margin:0 0 12px 0;">Kéo thả ảnh, chọn cây, nhận gợi ý xử lý chuẩn và báo cáo
+                        tức thì.</p>
+                    <div class="flex" style="flex-wrap:wrap; gap:10px;">
+                        <span class="status-chip"><span class="dot"></span>Ensemble Active</span>
+                        <span class="status-chip"><span class="dot"></span>Local inference</span>
+                        <span class="status-chip"><span class="dot"></span>CPU / Edge</span>
+                    </div>
+                    <div class="grid"
+                        style="grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:10px; margin-top:12px;">
+                        <div class="stat-block">
+                            <strong id="statActive">v2</strong>
+                            <div class="muted">Release active</div>
+                        </div>
+                        <div class="stat-block">
+                            <strong id="statModels">-</strong>
+                            <div class="muted">Models OK</div>
+                        </div>
+                        <div class="stat-block">
+                            <strong id="statLatency">-</strong>
+                            <div class="muted">Latency (ms)</div>
+                        </div>
+                    </div>
+                    <div class="step-list" style="margin-top:12px;">
+                        <div class="step-item">
+                            <div class="step-icon">1</div>
+                            <div><strong>Chọn cây</strong>
+                                <div class="muted">Gõ tìm nhanh, chọn đúng cây trồng.</div>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-icon">2</div>
+                            <div><strong>Tải ảnh lá</strong>
+                                <div class="muted">Ảnh rõ, đủ sáng, tập trung vùng bệnh.</div>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-icon">3</div>
+                            <div><strong>Nhận kết quả</strong>
+                                <div class="muted">Tên bệnh, độ tin cậy và khuyến nghị.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card glass" id="summaryCard">
+                    <div class="section-title">Tóm tắt</div>
+                    <h1 id="diseaseName">Chưa xác định</h1>
+                    <p class="muted" id="summaryText">Tải ảnh lá, chọn cây và bấm Dự đoán để nhận gợi ý.</p>
+                    <div class="stat-row">
+                        <span id="severityBadge" class="pill-lg">-</span>
+                        <span id="cropTag" class="pill-lg">Cây: -</span>
+                        <span id="modelTag" class="pill-lg">Model: -</span>
+                        <span id="confTag" class="pill-lg accent">Độ tin cậy: -</span>
+                    </div>
+                    <div class="muted" id="statusLine">CNN: chờ dự đoán.</div>
+                    <div class="stat-bar" style="margin:14px 0 10px 0;">
+                        <div id="reliabilityBar"></div>
+                    </div>
+                    <div class="flex" style="gap:10px; flex-wrap: wrap;">
+                        <button id="btnReport" class="btn ghost" type="button">Tải báo cáo</button>
+                        <button id="btnReset" class="btn ghost" type="button">Quét mới</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 1.05fr 0.95fr; align-items: start; margin-top:18px;">
+            <div class="card" style="overflow:hidden;">
+                <div class="section-title">Ảnh xem trước</div>
+                <div class="dropzone" id="dropZone">
+                    <p class="muted">Kéo thả ảnh hoặc bấm để chọn</p>
+                    <input id="fileInput" type="file" accept="image/*" class="input">
+                </div>
+                <div style="margin-top:12px;">
+                    <img id="previewImg" src="" alt="preview" style="width:100%; border-radius:12px; display:none;">
+                </div>
+                <div class="progress" style="margin-top:12px;">
+                    <div id="progressInner"></div>
+                </div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; margin-top:12px;">
+                    <div>
+                        <div class="section-title">Chọn cây</div>
+                        <div class="form-floating">
+                            <input id="cropSearch" class="input" placeholder=" " />
+                            <label for="cropSearch">Tìm loại cây</label>
+                        </div>
+                        <select id="cropSelect" class="input"></select>
+                    </div>
+                    <div class="flex" style="align-items:flex-end; justify-content:flex-end;">
+                        <button id="btnPredict" class="btn" style="width:100%;">Dự đoán</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card glass" style="min-height:260px;">
+                <div class="section-title">Nhật ký nhanh</div>
+                <div class="muted" style="margin-bottom:10px;">Sau mỗi dự đoán, nhật ký được lưu để xuất báo cáo.</div>
+                <ul id="historyList" class="muted" style="padding-left:16px; margin:0; display:grid; gap:6px;"></ul>
+            </div>
+        </div>
+    </div>
+    <div class="toast"></div>
+</body>
+
+</html>

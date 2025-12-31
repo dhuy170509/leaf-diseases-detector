@@ -86,28 +86,11 @@ app.get('/', (req, res) => {
   });
 });
 
-// Test API quickly
+// Test API quickly (returns NO_MODEL_INSTALLED status)
 app.get('/api/test-predict', async (req, res) => {
   try {
-    console.log('🧪 Testing ensemble prediction system...');
-
-    // Mock test
-    const testResult = {
-      label: 'Bệnh đốm lá test',
-      score: 0.85,
-      description: 'Đây là test mô tả chi tiết cho bệnh đốm lá.',
-      symptoms: ['Đốm nâu trên lá', 'Lá vàng dần'],
-      causes: 'Nấm gây bệnh do thời tiết ẩm ướt',
-      treatment: 'Phun thuốc diệt nấm theo hướng dẫn',
-      prevention: 'Thoát nước tốt, tránh tưới lên lá',
-      severity: 'Trung bình - Cần theo dõi',
-      modelUsed: 'Test Mode',
-      confidence: 'Cao'
-    };
-
-    console.log('✅ Test result:', testResult);
-    res.json({ success: true, prediction: testResult });
-
+    console.log('🧪 Test endpoint hit - no model installed');
+    res.json({ success: false, status: 'NO_MODEL_INSTALLED', message: 'No AI model is currently installed.' });
   } catch (error) {
     console.error('❌ Test error:', error);
     res.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' });

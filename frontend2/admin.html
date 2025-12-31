@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Admin • LeafGuard</title>
+    <link rel="stylesheet" href="/static/frontend2/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+        import { fetchJSON, toast, animateIn } from '/static/frontend2/app.js';
+
+        let chart;
+        let releases = [];
+        let adminKey = sessionStorage.getItem('ADMIN_KEY') || '';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            animateIn('.card');
+            bindForms();
+            ensureKey();
+            loadAll();
+        });
+
+        function ensureKey() {
+            if (!adminKey) {
+                adminKey = prompt('Nhập admin key');
+                if (adminKey) sessionStorage.setItem('ADMIN_KEY', adminKey);
+            }
+            return adminKey;
+        }
+
+        function adminHeaders() {
+            const key = ensureKey();
+            return key ? { 'X-Admin-Key': key } : {};
+        }
+
+        function adminFetchJSON(url, opts = {}) {
+            return fetchJSON(url, { ...opts, headers: { ...(opts.headers || {}), ...adminHeaders() } });
+        }
+
+        async function loadAll() {
+            await Promise.all([
+                loadStatus(),
+                loadReleases(),
+                loadDashboard(),
+                loadLogs(),
+            ]);
+        }
+
+        async function loadStatus() {
+            try {
+                const data = await fetchJSON('/system_status');
+                document.getElementById('status').textContent = `${data.system} ${data.ok}/${data.total}`;
+                document.getElementById('lockState').textContent = data.hard_lock ? `LOCKED: ${data.lock_reason || ''}` : 'UNLOCKED';
+                const models = await fetchJSON('/models');
+                const tbody = document.getElementById('modelRows');
+                tbody.innerHTML = '';
+                models.forEach(m => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${m.name}</td><td>${m.status}</td><td class="muted">${m.path}</td>`;
+                    tbody.append(tr);
+                });
+            } catch (e) { toast('Không đọc được trạng thái'); }
+        }
+
+        async function loadReleases() {
+            try {
+                const data = await adminFetchJSON('/admin/releases');
+                releases = data.releases || [];
+                const list = document.getElementById('releaseList');
+                list.innerHTML = '';
+                releases.forEach(rel => {
+                    const row = document.createElement('div');
+                    row.className = 'flex';
+                    row.style.justifyContent = 'space-between';
+                    row.innerHTML = `<div><strong>${rel.version}</strong> <span class="badge ${rel.active ? 'ok' : 'warn'}">${rel.active ? 'ACTIVE' : 'READY'}</span><div class="muted">${rel.files.join(', ') || 'No models'}</div></div>`;
+                    list.append(row);
+                });
+                const selectEls = document.querySelectorAll('.releaseSelect');
+                selectEls.forEach(sel => {
+                    sel.innerHTML = '';
+                    releases.forEach(rel => {
+                        const opt = document.createElement('option');
+                        opt.value = rel.version; opt.textContent = rel.version + (rel.active ? ' • active' : '');
+                        sel.append(opt);
+                    });
+                });
+            } catch (e) { /* ignore */ }
+        }
+
+        async function loadDashboard() {
+            try {
+                const data = await adminFetchJSON('/admin/dashboard');
+                renderChart(data.stats.by_crop || []);
+                renderStats(data.stats);
+                renderAudits(data.audits || []);
+            } catch (e) { toast('Khong doc duoc dashboard'); }
+        }
+
+        function renderChart(byCrop) {
+            const ctx = document.getElementById('chart').getContext('2d');
+            const labels = byCrop.map(i => i.crop || 'unknown');
+            const values = byCrop.map(i => i.count);
+            if (!chart) {
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels, datasets: [{ label: 'Predictions', data: values, backgroundColor: 'rgba(92,225,230,0.6)' }] },
+                    options: { animation: { duration: 900, easing: 'easeOutCubic' }, plugins: { legend: { display: false } } }
+                });
+            } else {
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = values;
+                chart.update();
+            }
+        }
+
+        function renderStats(stats) {
+            document.getElementById('statPred').textContent = stats.total_predictions;
+            document.getElementById('statUploads').textContent = stats.uploads;
+            document.getElementById('statFeedback').textContent = stats.feedback;
+            document.getElementById('statContacts').textContent = stats.contacts;
+            const history = stats.history || [];
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+            history.forEach(h => {
+                const li = document.createElement('li');
+                li.textContent = `${h.action} • ${h.detail}`;
+                list.append(li);
+            });
+        }
+
+        function renderAudits(audits) {
+            const box = document.getElementById('auditList');
+            box.innerHTML = '';
+            audits.forEach(a => {
+                const item = document.createElement('div');
+                item.className = 'flex';
+                item.style.justifyContent = 'space-between';
+                item.innerHTML = `<div><strong>${a.version}</strong> <span class="muted">${a.action}</span></div><div class="muted">${a.created_at}</div>`;
+                box.append(item);
+            });
+        }
+
+        async function loadLogs() {
+            try {
+                const data = await adminFetchJSON('/admin/logs');
+                document.getElementById('logs').textContent = data.logs.join('');
+            } catch (e) { /* ignore */ }
+        }
+
+        function bindForms() {
+            document.getElementById('formUpload').onsubmit = async (e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const res = await fetch('/admin/upload_model', { method: 'POST', body: fd, headers: adminHeaders() });
+                const data = await res.json();
+                if (!res.ok) { toast(data.detail || 'Upload fail'); return; }
+                toast('Upload ok'); loadReleases();
+            };
+            document.getElementById('formActivate').onsubmit = async (e) => {
+                e.preventDefault();
+                const ver = e.target.version.value;
+                const r = await fetch('/hot_swap?version=' + encodeURIComponent(ver), { method: 'POST', headers: adminHeaders() });
+                const d = await r.json();
+                if (!r.ok) { toast(d.detail || 'Activate fail'); return; }
+                toast('Activated'); loadAll();
+            };
+            document.getElementById('formRollback').onsubmit = async (e) => {
+                e.preventDefault();
+                const ver = e.target.version.value;
+                const r = await fetch('/rollback?version=' + encodeURIComponent(ver), { method: 'POST', headers: adminHeaders() });
+                const d = await r.json();
+                if (!r.ok) { toast(d.detail || 'Rollback fail'); return; }
+                toast('Rolled back'); loadAll();
+            };
+            document.getElementById('btnLock').onclick = () => toggleLock('lock');
+            document.getElementById('btnUnlock').onclick = () => toggleLock('unlock');
+        }
+
+        async function toggleLock(action) {
+            const fd = new FormData();
+            fd.append('action', action);
+            fd.append('reason', 'manual');
+            const res = await fetch('/admin/hard_lock', { method: 'POST', body: fd, headers: adminHeaders() });
+            const data = await res.json();
+            if (!res.ok) { toast(data.detail || 'Lock fail'); return; }
+            toast(action === 'lock' ? 'Locked' : 'Unlocked');
+            loadAll();
+        }
+    </script>
+</head>
+
+<body>
+    <div class="navbar">
+        <div><strong>LeafGuard Admin</strong></div>
+        <div class="nav-links">
+            <a href="/frontend2/index.html">Trang chủ</a>
+            <a href="/frontend2/predict.html">Dự đoán</a>
+            <a href="/frontend2/admin.html">Quản trị</a>
+        </div>
+    </div>
+    <div class="main" style="padding-top:90px;">
+        <div class="grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="card chart-card"><canvas id="chart"></canvas></div>
+            <div class="card">
+                <h3>Trạng thái</h3>
+                <div id="status" class="muted">-</div>
+                <div class="flex" style="justify-content: space-between; align-items: center;">
+                    <div class="muted">Lock: <span id="lockState">-</span></div>
+                    <div class="flex" style="gap:8px;">
+                        <button id="btnLock" class="btn" style="padding:8px 12px;">Khoá cứng</button>
+                        <button id="btnUnlock" class="btn" style="padding:8px 12px;">Mở khoá</button>
+                    </div>
+                </div>
+                <h4>Models</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Tên</th>
+                            <th>Trạng thái</th>
+                            <th>Path</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modelRows"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); margin-top:16px;">
+            <div class="card">
+                <h4>Thống kê nhanh</h4>
+                <div class="grid" style="grid-template-columns: repeat(2, minmax(0,1fr));">
+                    <div class="badge ok">Dự đoán</div>
+                    <div id="statPred" class="h3">0</div>
+                    <div class="badge warn">Uploads</div>
+                    <div id="statUploads" class="h3">0</div>
+                    <div class="badge ok">Feedback</div>
+                    <div id="statFeedback" class="h3">0</div>
+                    <div class="badge warn">Liên hệ</div>
+                    <div id="statContacts" class="h3">0</div>
+                </div>
+                <h4>Lịch sử gần</h4>
+                <ul id="historyList" class="muted" style="padding-left:16px; margin:0;"></ul>
+            </div>
+            <div class="card">
+                <h4>Releases</h4>
+                <div id="releaseList" class="grid" style="gap:10px;"></div>
+            </div>
+            <div class="card">
+                <h4>Nhật ký model</h4>
+                <div id="auditList" class="grid" style="gap:10px;"></div>
+            </div>
+        </div>
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); margin-top:16px;">
+            <div class="card">
+                <h4>Tải lên model</h4>
+                <form id="formUpload" class="grid">
+                    <input name="version" class="input" placeholder="phiên bản (v2, v3...)" required>
+                    <input type="file" name="file" class="input" required>
+                    <button class="btn">Upload</button>
+                </form>
+            </div>
+            <div class="card">
+                <h4>Kích hoạt</h4>
+                <form id="formActivate" class="grid">
+                    <select name="version" class="input releaseSelect" required></select>
+                    <button class="btn">Activate</button>
+                </form>
+            </div>
+            <div class="card">
+                <h4>Rollback</h4>
+                <form id="formRollback" class="grid">
+                    <select name="version" class="input releaseSelect" required></select>
+                    <button class="btn">Rollback</button>
+                </form>
+            </div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+            <h4>Logs</h4>
+            <pre id="logs" style="max-height:240px; overflow:auto;"></pre>
+        </div>
+    </div>
+    <div class="toast"></div>
+</body>
+
+</html>

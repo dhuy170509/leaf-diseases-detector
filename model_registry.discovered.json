@@ -1,0 +1,52 @@
+{
+  "chili": {
+    "path": "D:/huy/leaf-disease-detector-1/models/chili_AI_model_package/chili_disease_tier2_resnet50.h5",
+    "type": "cnn",
+    "input": 224
+  },
+  "chili_2": {
+    "path": "D:/huy/leaf-disease-detector-1/models/chili_AI_model_package/chili_disease_tier2_resnet50.tflite",
+    "type": "tflite",
+    "input": 224
+  },
+  "chili_3": {
+    "path": "D:/huy/leaf-disease-detector-1/models/chili_AI_model_package/chili_disease_tier2_resnet50_savedmodel/variables/chili_disease_tier2_resnet50.tflite",
+    "type": "tflite",
+    "input": 224
+  },
+  "peanut": {
+    "path": "D:/huy/leaf-disease-detector-1/models/peanut.h5",
+    "type": "cnn",
+    "input": 224
+  },
+  "pumpkin": {
+    "path": "D:/huy/leaf-disease-detector-1/models/PumpkinLeaf_AI_System_FINAL_READY/models/efficientnetb3.keras",
+    "type": "cnn",
+    "input": 224
+  },
+  "pumpkin_2": {
+    "path": "D:/huy/leaf-disease-detector-1/models/PumpkinLeaf_AI_System_FINAL_READY/models/resnet50.keras",
+    "type": "cnn",
+    "input": 224
+  },
+  "rice": {
+    "path": "D:/huy/leaf-disease-detector-1/models/rice_AI_model_package/rice_disease_resnet50.h5",
+    "type": "cnn",
+    "input": 224
+  },
+  "rice_2": {
+    "path": "D:/huy/leaf-disease-detector-1/models/rice_AI_model_package/rice_disease_resnet50.tflite",
+    "type": "tflite",
+    "input": 224
+  },
+  "rice_3": {
+    "path": "D:/huy/leaf-disease-detector-1/models/rice_AI_model_package/rice_tier1_detector.tflite",
+    "type": "tflite",
+    "input": 224
+  },
+  "tomato": {
+    "path": "D:/huy/leaf-disease-detector-1/models/tomato/segmentation_multi_task_model.tflite",
+    "type": "tflite",
+    "input": 224
+  }
+}

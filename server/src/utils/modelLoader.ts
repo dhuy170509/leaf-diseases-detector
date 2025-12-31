@@ -1,16 +1,24 @@
-import { ImageData } from '../types.js';
-import imageProcessing from '../utils/imageProcessing.js';
-import fs from 'fs';
-import path from 'path';
-import axios from 'axios';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { fileURLToPath } from 'url';
+// Model support removed — project is in NO_MODEL_INSTALLED state.
+// This module intentionally contains no executable model code.
+// Any attempt to call model functions will throw an explicit error.
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+export async function loadModel(_: string | undefined): Promise<any> {
+  throw new Error('Model support disabled (NO_MODEL_INSTALLED)');
+}
 
-// Cache for loaded model
-let cachedModel: any = null;
+export async function predict(_: any, __?: any): Promise<any> {
+  throw new Error('Model support disabled (NO_MODEL_INSTALLED)');
+}
+
+export async function predictImage(_: any): Promise<any> {
+  throw new Error('Model support disabled (NO_MODEL_INSTALLED)');
+}
+
+export function clearModelCache(): void {
+  // intentionally no-op
+}
+
+export default { loadModel, predict, predictImage, clearModelCache };
 
 // AI Models configuration for high accuracy (90%+)
 const HF_API_KEY = process.env.HF_API_KEY || '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';

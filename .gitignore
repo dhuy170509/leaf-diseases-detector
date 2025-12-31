@@ -14,6 +14,28 @@ efficientnetb0_notop.h5
 plant_disease_model.h5
 mango_model.h5
 
+# Model artifact patterns
+*.pth
+*.pt
+*.onnx
+*.pickle
+*.joblib
+*.ckpt
+*.sav
+
+# Ignore any model folders and artifacts
+model/
+model/**/*
+models/
+models/**/*
+uploads/
+uploads/**/*
+artifacts/
+artifacts/**/*
+
+# Virtual environment
+.venv/
+
 # Large files
 *.exe
 cloudflared.exe
@@ -21,5 +43,8 @@ cloudflared.exe
 # Database
 *.db
 database/disease_detector.db
+db.sqlite
+database/*.txt
+database/*.log
 
 .env

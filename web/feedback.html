@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feedback - Agri AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+</head>
+
+<body class="min-h-screen bg-slate-950 text-slate-50">
+    <div class="gradient-bg"></div>
+
+    <header class="fixed inset-x-0 top-0 z-30">
+        <div
+            class="mx-auto mt-4 flex max-w-6xl items-center justify-between rounded-full border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-2xl shadow-xl shadow-emerald-900/40">
+            <div class="flex items-center gap-3">
+                <a href="/"
+                    class="flex h-11 w-11 items-center justify-center rounded-full border border-emerald-300/40 bg-gradient-to-br from-emerald-400/30 to-cyan-300/30 text-xl">🌿</a>
+                <div>
+                    <div class="text-sm uppercase tracking-[0.24em] text-emerald-200">Agri AI</div>
+                    <div class="text-lg font-semibold">Feedback công khai</div>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                <a href="/upload.html" class="nav-pill nav-underline">Tải ảnh</a>
+                <a href="/predict.html" class="nav-pill nav-underline">Kết quả</a>
+                <span class="pill">Công khai</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 mx-auto max-w-6xl space-y-10 px-4 pb-16 pt-32">
+        <section class="grid gap-6 lg:grid-cols-[1.05fr,0.95fr]">
+            <div class="glass-panel glow-card p-6 space-y-4 animate-on-scroll">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="eyebrow">Gửi góp ý</p>
+                        <h1 class="text-3xl font-extrabold">Chúng tôi lắng nghe bạn</h1>
+                    </div>
+                    <span class="pill">Không cần đăng nhập</span>
+                </div>
+                <form id="feedbackForm" class="space-y-4">
+                    <div class="floating-group">
+                        <input id="fbName" type="text" class="input-box w-full" placeholder=" " />
+                        <label for="fbName">Tên (tuỳ chọn)</label>
+                    </div>
+                    <div class="floating-group">
+                        <textarea id="fbMessage" rows="4" class="input-box w-full" placeholder=" " required></textarea>
+                        <label for="fbMessage">Nội dung</label>
+                    </div>
+                    <button type="submit" class="primary-btn">Gửi phản hồi</button>
+                    <div id="fbStatus" class="text-sm text-emerald-200 hidden">Đang gửi...</div>
+                </form>
+            </div>
+
+            <div class="glass-panel glow-card p-6 space-y-4 animate-on-scroll">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="eyebrow">Bảng tin</p>
+                        <h2 class="section-title text-2xl">Phản hồi mới nhất</h2>
+                    </div>
+                    <button id="btnRefresh" class="pill">Làm mới</button>
+                </div>
+                <div id="feedbackList" class="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+                    <div class="placeholder-card">Đang tải phản hồi...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-white/10 bg-slate-950/80 backdrop-blur-xl">
+        <div
+            class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-slate-300 md:flex-row md:items-center md:justify-between">
+            <div class="space-y-1">
+                <div>Agri AI SaaS · Feedback</div>
+                <div class="text-emerald-200">Facebook: https://www.facebook.com/17.th05.2009</div>
+                <div class="text-emerald-200">Zalo: Bùi Lê Đan Huy</div>
+                <div class="text-emerald-200">Phone: 0356162193 · Email: builedanhuygov@gmail.com</div>
+            </div>
+            <div class="flex flex-wrap gap-4">
+                <a class="hover:text-emerald-200" href="/upload.html">Tải ảnh</a>
+                <a class="hover:text-emerald-200" href="/predict.html">Kết quả</a>
+                <a class="hover:text-emerald-200" href="/admin.html">Admin</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const list = document.getElementById('feedbackList');
+            const form = document.getElementById('feedbackForm');
+            const status = document.getElementById('fbStatus');
+            const btnRefresh = document.getElementById('btnRefresh');
+
+            async function loadFeedback() {
+                list.innerHTML = '<div class="placeholder-card">Đang tải phản hồi...</div>';
+                try {
+                    const res = await fetch('/feedback');
+                    const data = await res.json();
+                    const items = Array.isArray(data.items) ? data.items : [];
+                    if (!items.length) {
+                        list.innerHTML = '<div class="placeholder-card">Chưa có phản hồi.</div>';
+                        return;
+                    }
+                    list.innerHTML = items
+                        .map((item) => `
+                            <div class="info-card">
+                                <div class="flex items-center justify-between text-xs text-slate-300/80">
+                                    <span>${new Date(item.ts).toLocaleString()}</span>
+                                    <span class="pill">${escapeHtml(item.name || 'Ẩn danh')}</span>
+                                </div>
+                                <div class="text-sm text-slate-100 mt-1">${escapeHtml(item.message || '')}</div>
+                            </div>`)
+                        .join('');
+                } catch (err) {
+                    list.innerHTML = '<div class="placeholder-card">Không tải được phản hồi.</div>';
+                }
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                status.classList.remove('hidden');
+                status.textContent = 'Đang gửi...';
+                const payload = {
+                    name: document.getElementById('fbName').value.trim(),
+                    message: document.getElementById('fbMessage').value.trim(),
+                };
+                try {
+                    const res = await fetch('/feedback', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+                    if (res.ok) {
+                        status.textContent = 'Đã ghi nhận, cảm ơn bạn!';
+                        form.reset();
+                        loadFeedback();
+                    } else {
+                        status.textContent = 'Gửi thất bại.';
+                    }
+                } catch (err) {
+                    status.textContent = 'Lỗi kết nối.';
+                }
+                setTimeout(() => status.classList.add('hidden'), 2400);
+            });
+
+            btnRefresh.addEventListener('click', loadFeedback);
+
+            function escapeHtml(str) {
+                return String(str || '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
+            loadFeedback();
+        });
+    </script>
+</body>
+
+</html>

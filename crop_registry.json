@@ -1,0 +1,40 @@
+{
+    "tomato": {
+        "models": [
+            "tomato_model.h5",
+            "vit_tomato.safetensors"
+        ],
+        "size": 224
+    },
+    "rice": {
+        "models": [
+            "rice_model.tflite",
+            "rice_vit.safetensors"
+        ],
+        "size": 224
+    },
+    "chili": {
+        "models": [
+            "chili.h5"
+        ],
+        "size": 224
+    },
+    "potato": {
+        "models": [
+            "Potato.keras"
+        ],
+        "size": 256
+    },
+    "corn": {
+        "models": [
+            "corn.h5"
+        ],
+        "size": 224
+    },
+    "peanut": {
+        "models": [
+            "peanut.h5"
+        ],
+        "size": 224
+    }
+}

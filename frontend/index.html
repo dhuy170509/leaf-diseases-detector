@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>LeafGuard AI</title>
+    <link rel="stylesheet" href="/static/frontend/style.css">
+</head>
+
+<body>
+    <div class="main">
+        <div class="hero card">
+            <div>
+                <div class="tag">AI Plant Health - Realtime</div>
+                <h1>Phat hien & khuyen nghi benh cay an toan cho mo hinh</h1>
+                <p>He thong quet nhieu mo hinh noi bo, lock an toan neu loi, tra ket qua nhat quan cho tung loai cay.
+                </p>
+                <div class="flex" style="gap:14px;margin-top:10px;">
+                    <a href="/frontend/predict.html"><button>Bat dau du doan</button></a>
+                    <a href="/frontend/disease.html" class="muted">Xem thu vien benh</a>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="section-title">Trang thai he thong</h3>
+                <div id="systemStatus" class="flex" style="justify-content:space-between;">
+                    <span class="muted">Dang kiem tra...</span>
+                </div>
+                <div style="margin-top:12px;">
+                    <div class="muted">Mo hinh kha dung</div>
+                    <div class="progress">
+                        <div id="progressBar" style="width:0%"></div>
+                    </div>
+                    <div class="muted" id="modelCounts" style="margin-top:6px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="grid" style="grid-template-columns: repeat(auto-fit,minmax(240px,1fr));">
+            <div class="card">
+                <h3 class="section-title">Du doan nhanh</h3>
+                <p class="muted">Upload anh la, chon cay, nhan ket qua.</p>
+                <a href="/frontend/predict.html">Di toi Prediction</a>
+            </div>
+            <div class="card">
+                <h3 class="section-title">Thu vien benh</h3>
+                <p class="muted">Mo ta, trieu chung, phong ngua.</p>
+                <a href="/frontend/disease.html">Mo Disease Info</a>
+            </div>
+            <div class="card">
+                <h3 class="section-title">Dashboard</h3>
+                <p class="muted">Thong ke theo cay/vung (tuy chon).</p>
+                <a href="/frontend/dashboard.html">Xem Dashboard</a>
+            </div>
+            <div class="card">
+                <h3 class="section-title">Support</h3>
+                <p class="muted">Huong dan & lien he.</p>
+                <a href="/frontend/support.html">Lien he</a>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        async function refresh() {
+            try {
+                const res = await fetch('/system_status');
+                if (!res.ok) throw new Error('fail');
+                const data = await res.json();
+                const el = document.getElementById('systemStatus');
+                const badge = document.createElement('span');
+                badge.className = 'badge ' + (data.system === 'UNLOCKED' ? 'badge-ok' : 'badge-locked');
+                badge.textContent = data.system;
+                el.innerHTML = '';
+                el.append(badge, document.createTextNode(` tong ${data.total_models}, ok ${data.ok}, broken ${data.broken}`));
+                const pct = data.total_models ? Math.round((data.ok / data.total_models) * 100) : 0;
+                document.getElementById('progressBar').style.width = pct + '%';
+                document.getElementById('modelCounts').textContent = `${data.ok}/${data.total_models} model san sang`;
+            } catch (e) {
+                document.getElementById('systemStatus').innerHTML = '<span class="badge badge-locked">LOCKED</span> Khong doc duoc trang thai';
+            }
+        }
+        refresh();
+    </script>
+</body>
+
+</html>

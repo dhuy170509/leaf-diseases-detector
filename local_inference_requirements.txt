@@ -1,0 +1,8 @@
+numpy
+pillow
+torch
+tensorflow-cpu
+onnxruntime
+fastapi
+uvicorn
+python-multipart

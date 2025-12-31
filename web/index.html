@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agri AI SaaS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+</head>
+
+<body class="min-h-screen bg-slate-950 text-slate-50">
+    <div class="gradient-bg"></div>
+    <div class="leaf-floats" aria-hidden="true">
+        <span class="leaf leaf-a"></span>
+        <span class="leaf leaf-b"></span>
+        <span class="leaf leaf-c"></span>
+        <span class="leaf leaf-d"></span>
+    </div>
+
+    <header class="fixed inset-x-0 top-0 z-30">
+        <div
+            class="mx-auto mt-4 flex max-w-6xl items-center justify-between rounded-full border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-2xl shadow-xl shadow-emerald-900/40">
+            <div class="flex items-center gap-3">
+                <div
+                    class="flex h-11 w-11 items-center justify-center rounded-full border border-emerald-300/40 bg-gradient-to-br from-emerald-400/30 to-cyan-300/30 text-xl">
+                    🌿</div>
+                <div>
+                    <div class="text-sm uppercase tracking-[0.24em] text-emerald-200">Agri AI</div>
+                    <div class="text-lg font-semibold">Plant Health Cloud</div>
+                </div>
+            </div>
+            <button id="nav-toggle"
+                class="rounded-full border border-white/20 p-2 text-white/80 hover:bg-white/10 lg:hidden">
+                <span class="sr-only">Menu</span>
+                <div class="mb-1 h-0.5 w-6 bg-white"></div>
+                <div class="mb-1 h-0.5 w-6 bg-white"></div>
+                <div class="h-0.5 w-6 bg-white"></div>
+            </button>
+            <nav id="nav-links" class="hidden items-center gap-3 text-sm font-semibold lg:flex">
+                <a class="nav-pill nav-underline" data-target="du-doan">DỰ ĐOÁN</a>
+                <a class="nav-pill nav-underline" data-target="dac-diem">ĐẶC ĐIỂM</a>
+                <a class="nav-pill nav-underline" data-target="benh-cay">BỆNH CÂY</a>
+                <a class="nav-pill nav-underline" data-target="ai-chat">AI CHAT</a>
+                <a class="nav-pill nav-underline" data-target="ban-do">BẢN ĐỒ</a>
+                <a class="nav-pill nav-underline" data-target="lien-he">LIÊN HỆ</a>
+                <a class="ml-2 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300 px-4 py-2 text-emerald-950 shadow-lg shadow-emerald-800/40 transition hover:scale-[1.03] hover:shadow-xl"
+                    data-target="du-doan">TẢI ẢNH LÁ CÂY</a>
+            </nav>
+        </div>
+        <div id="nav-drawer"
+            class="mx-auto mt-3 hidden max-w-6xl space-y-2 rounded-2xl border border-white/10 bg-slate-900/90 px-4 py-3 backdrop-blur-2xl lg:hidden">
+            <a class="nav-link-mobile" data-target="du-doan">DỰ ĐOÁN</a>
+            <a class="nav-link-mobile" data-target="dac-diem">ĐẶC ĐIỂM</a>
+            <a class="nav-link-mobile" data-target="benh-cay">BỆNH CÂY</a>
+            <a class="nav-link-mobile" data-target="ai-chat">AI CHAT</a>
+            <a class="nav-link-mobile" data-target="ban-do">BẢN ĐỒ</a>
+            <a class="nav-link-mobile" data-target="lien-he">LIÊN HỆ</a>
+        </div>
+    </header>
+
+    <main class="relative z-10 mx-auto max-w-6xl space-y-20 px-4 pb-20 pt-32">
+        <section id="hero" class="grid items-center gap-10 lg:grid-cols-2">
+            <div class="space-y-6 animate-on-scroll parallax">
+                <p class="text-xs uppercase tracking-[0.25em] text-emerald-200">Modern AI • Local-first • Green SaaS</p>
+                <h1 class="text-4xl font-extrabold leading-tight sm:text-5xl text-gradient">NỀN TẢNG AI PHÁT HIỆN BỆNH
+                    CÂY TRỒNG</h1>
+                <p class="text-lg text-slate-200/90">Dự đoán bệnh lá, gợi ý xử lý chuẩn Bộ Nông nghiệp, chat AI
+                    realtime, và quản lý liên hệ an toàn.</p>
+                <div class="flex flex-wrap items-center gap-3">
+                    <a class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-300 px-6 py-3 font-bold text-emerald-950 shadow-cta transition hover:scale-[1.04]"
+                        data-target="du-doan">TẢI ẢNH LÁ CÂY</a>
+                    <div id="status" class="status-pill">Đang kiểm tra mô hình...</div>
+                </div>
+                <div class="flex gap-3 text-sm text-emerald-100/90">
+                    <span class="pill">/predict</span>
+                    <span class="pill">/chat</span>
+                    <span class="pill">/contact</span>
+                </div>
+            </div>
+            <div class="relative animate-on-scroll parallax" data-depth="12">
+                <div class="floating-leaf" aria-hidden="true"></div>
+                <div class="glass-panel space-y-4 p-6 glow-card">
+                    <div class="flex items-center gap-3">
+                        <div class="badge">Ensemble</div>
+                        <div class="text-sm text-emerald-100/80">Local-only · CPU</div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 text-sm">
+                        <div class="metric">
+                            <div class="text-emerald-200">Privacy</div>
+                            <div class="font-semibold">Local inference</div>
+                        </div>
+                        <div class="metric">
+                            <div class="text-emerald-200">Crops</div>
+                            <div class="font-semibold">Lúa · Mận</div>
+                        </div>
+                        <div class="metric">
+                            <div class="text-emerald-200">API</div>
+                            <div class="font-semibold">Flask</div>
+                        </div>
+                    </div>
+                    <div
+                        class="h-40 rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-400/20 to-cyan-400/10 flex items-center justify-center text-5xl shadow-inner">
+                        🍃
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="du-doan" class="space-y-6">
+            <div class="section-head animate-on-scroll">
+                <div class="eyebrow">DỰ ĐOÁN</div>
+                <h2 class="section-title">Tải ảnh lá và nhận kết quả</h2>
+                <p class="text-slate-200/80">Drag & drop ảnh JPG/PNG. Xử lý cục bộ, trả về bệnh, độ tự tin, giải pháp.
+                </p>
+            </div>
+            <div class="grid gap-6 lg:grid-cols-2">
+                <div class="glass-panel space-y-4 animate-on-scroll glow-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="eyebrow">Bước 1</p>
+                            <h3 class="text-xl font-semibold">Tải ảnh lá</h3>
+                        </div>
+                        <button id="resetBtn" class="pill">Làm mới</button>
+                    </div>
+                    <label class="floating-group">
+                        <select id="cropSelect" class="input-box w-full bg-slate-900/60">
+                            <option value="rice">Lúa</option>
+                            <option value="chili">Ớt</option>
+                            <option value="tomato">Cà chua</option>
+                            <option value="pumpkin">Bí ngô</option>
+                        </select>
+                        <span>Chọn cây trồng</span>
+                    </label>
+                    <label for="fileInput" id="drop" class="upload-box">
+                        <div class="text-4xl">🌿</div>
+                        <div class="text-lg font-semibold">Chọn hoặc kéo thả ảnh</div>
+                        <p class="text-sm text-slate-200/70">Ảnh xử lý cục bộ, không gửi lên cloud.</p>
+                    </label>
+                    <input id="fileInput" type="file" accept="image/*" class="hidden" />
+                    <div id="previewContainer"
+                        class="hidden overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                        <img id="preview" alt="Preview" class="max-h-80 w-full object-contain" />
+                    </div>
+                    <div class="progress-shell hidden" id="progressShell">
+                        <div class="progress-bar-inner" id="progressFill"></div>
+                    </div>
+                    <button id="predictBtn" class="primary-btn w-full" disabled>
+                        <span id="btnLabel">Phân tích ảnh</span>
+                        <span id="btnPulse" class="dot-pulse"></span>
+                    </button>
+                </div>
+
+                <div class="glass-panel space-y-4 animate-on-scroll result-glow" id="resultCard">
+                    <div>
+                        <p class="eyebrow">Bước 2</p>
+                        <h3 class="text-xl font-semibold">Kết quả dự đoán</h3>
+                    </div>
+                    <div id="results" class="space-y-3">
+                        <div class="placeholder-card">Tải ảnh để xem kết quả.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="dac-diem" class="space-y-6">
+            <div class="section-head animate-on-scroll">
+                <div class="eyebrow">ĐẶC ĐIỂM CÂY TRỒNG</div>
+                <h2 class="section-title">Nhận biết nhanh lúa và mận</h2>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div class="info-card animate-on-scroll">
+                    <div class="mb-2 flex items-center gap-3"><span class="text-2xl">🌾</span>
+                        <h3 class="text-lg font-semibold">RICE (CÂY LÚA)</h3>
+                    </div>
+                    <ul class="list-disc pl-5 text-sm text-slate-200/85 space-y-1">
+                        <li>Thân rỗng, lá mảnh</li>
+                        <li>Mẫn cảm đạo ôn, bạc lá</li>
+                    </ul>
+                </div>
+                <div class="info-card animate-on-scroll">
+                    <div class="mb-2 flex items-center gap-3"><span class="text-2xl">🍑</span>
+                        <h3 class="text-lg font-semibold">PLUM (CÂY MẬN)</h3>
+                    </div>
+                    <ul class="list-disc pl-5 text-sm text-slate-200/85 space-y-1">
+                        <li>Lá dày, mép răng cưa</li>
+                        <li>Hay bị thán thư, rỉ sắt</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="benh-cay" class="space-y-6">
+            <div class="section-head animate-on-scroll">
+                <div class="eyebrow">BỆNH CÂY</div>
+                <h2 class="section-title">Thư viện bệnh (flip & modal)</h2>
+                <p class="text-slate-200/80">Đạo ôn, Bạc lá, Thán thư, Rỉ sắt với mô tả và giải pháp.</p>
+            </div>
+            <div id="disease-list" class="grid gap-4 md:grid-cols-2 lg:grid-cols-4"></div>
+        </section>
+
+        <section id="ai-chat" class="space-y-6">
+            <div class="section-head animate-on-scroll">
+                <div class="eyebrow">AI CHAT</div>
+                <h2 class="section-title">Hỏi đáp chăm sóc cây</h2>
+            </div>
+            <div class="glass-panel space-y-4 animate-on-scroll glow-card">
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="pill ai-status">● AI Online</div>
+                    <div class="text-sm text-emerald-100/80">Hỏi đáp thời gian thực. Gửi câu hỏi để nhận gợi ý.</div>
+                </div>
+                <div id="chatWindow" class="chat-window"></div>
+                <div class="typing-indicator hidden" id="typing">
+                    <span></span><span></span><span></span>
+                </div>
+                <div class="flex gap-2">
+                    <input id="chatInput" type="text" placeholder="Nhập câu hỏi..."
+                        class="input-box flex-1 floating-input" />
+                    <button id="chatSend" class="primary-btn px-4">Gửi</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="ban-do" class="space-y-4">
+            <div class="section-head animate-on-scroll">
+                <div class="eyebrow">BẢN ĐỒ</div>
+                <h2 class="section-title">Heat map bệnh cây</h2>
+            </div>
+            <div class="glass-panel relative h-64 overflow-hidden md:h-80 animate-on-scroll">
+                <div class="absolute inset-0 bg-gradient-to-br from-emerald-400/20 via-cyan-400/10 to-slate-900"></div>
+                <div class="absolute inset-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl"></div>
+                <div
+                    class="absolute inset-0 flex items-center justify-center text-center text-emerald-100 font-semibold px-6">
+                    Bản đồ dịch bệnh sẽ hiển thị khi dữ liệu được đồng bộ.</div>
+            </div>
+        </section>
+
+        <section id="lien-he" class="space-y-6">
+            <div class="section-head animate-on-scroll">
+                <div class="eyebrow">LIÊN HỆ</div>
+                <h2 class="section-title">Kết nối với chúng tôi</h2>
+                <p class="text-slate-200/80">Góp ý, báo lỗi, hoặc yêu cầu tính năng.</p>
+            </div>
+            <form id="contactForm" class="glass-panel space-y-6 animate-on-scroll glow-card">
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div class="floating-group">
+                        <input id="contactName" type="text" class="input-box w-full" placeholder=" " required />
+                        <label for="contactName">Name</label>
+                    </div>
+                    <div class="floating-group">
+                        <input id="contactEmail" type="email" class="input-box w-full" placeholder=" " required />
+                        <label for="contactEmail">Email</label>
+                    </div>
+                </div>
+                <div class="floating-group">
+                    <textarea id="contactMessage" rows="4" class="input-box w-full" placeholder=" " required></textarea>
+                    <label for="contactMessage">Message</label>
+                </div>
+                <button type="submit" class="primary-btn">Gửi liên hệ</button>
+                <div id="contactStatus" class="text-sm text-emerald-200 hidden">Đã ghi nhận thông tin.</div>
+            </form>
+        </section>
+    </main>
+
+    <div id="diseaseModal" class="modal hidden">
+        <div class="modal-content">
+            <button id="modalClose" class="pill self-end">Đóng</button>
+            <h3 id="modalTitle" class="text-2xl font-bold"></h3>
+            <p id="modalCause" class="text-sm text-emerald-100/80 mt-2"></p>
+            <p id="modalEffect" class="text-sm text-slate-200/85 mt-3"></p>
+        </div>
+    </div>
+
+    <div id="toast" class="toast hidden">Đã gửi liên hệ thành công</div>
+
+    <footer class="border-t border-white/10 bg-slate-950/80 backdrop-blur-xl">
+        <div
+            class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-sm text-slate-300 md:flex-row">
+            <div class="space-y-1 text-center md:text-left">
+                <div>Agri AI SaaS · Flask · Multi-model (Rice/Chili/Tomato/Pumpkin)</div>
+                <div class="text-emerald-200">Facebook: https://www.facebook.com/17.th05.2009</div>
+                <div class="text-emerald-200">Zalo: Bùi Lê Đan Huy</div>
+                <div class="text-emerald-200">Phone: 0356162193 · Email: builedanhuygov@gmail.com</div>
+            </div>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a class="hover:text-emerald-200" href="/upload.html">Trang tải ảnh</a>
+                <a class="hover:text-emerald-200" href="/feedback.html">Feedback</a>
+                <a class="hover:text-emerald-200" href="/health" target="_blank" rel="noopener">Health</a>
+                <a class="hover:text-emerald-200" data-target="hero">Lên đầu trang</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/upload.js"></script>
+</body>
+
+</html>

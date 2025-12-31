@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Support • LeafGuard AI</title>
+    <link rel="stylesheet" href="/static/frontend/style.css">
+</head>
+
+<body>
+    <div class="main card">
+        <h2 class="section-title">Support / Lien he</h2>
+        <form id="contactForm" class="grid">
+            <input class="input" name="name" placeholder="Ten" required>
+            <input class="input" name="email" type="email" placeholder="Email" required>
+            <textarea class="input" name="message" rows="4" placeholder="Noi dung" required></textarea>
+            <button>Gui</button>
+        </form>
+        <div id="contactResult" class="muted" style="margin-top:10px;"></div>
+    </div>
+    <script type="module">
+        document.getElementById('contactForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const form = new FormData(e.target);
+            const res = await fetch('/contact', { method: 'POST', body: JSON.stringify(Object.fromEntries(form)), headers: { 'Content-Type': 'application/json' } });
+            document.getElementById('contactResult').textContent = res.ok ? 'Da gui' : 'Loi gui';
+            if (res.ok) e.target.reset();
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Support • LeafGuard</title>
+    <link rel="stylesheet" href="/static/frontend2/style.css">
+    <script type="module">
+        import { fetchJSON, toast, animateIn, registerReveal, initFloatingChat } from '/static/frontend2/app.js';
+        window.addEventListener('DOMContentLoaded', () => {
+            bind();
+            animateIn('.card');
+            registerReveal('.card');
+            initFloatingChat({ title: 'LeafGuard AI Chat', apiEndpoint: '/chat', allowClientKey: false });
+        });
+
+        function bind() {
+            document.getElementById('contactForm').onsubmit = async (e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const payload = Object.fromEntries(fd.entries());
+                const r = await fetch('/contact', { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json' } });
+                const d = await r.json();
+                if (!r.ok) { toast(d.detail || 'Lỗi gửi'); return; }
+                toast('Đã gửi'); e.target.reset();
+            };
+            document.getElementById('feedbackForm').onsubmit = async (e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const payload = Object.fromEntries(fd.entries());
+                const r = await fetch('/feedback', { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json' } });
+                const d = await r.json();
+                if (!r.ok) { toast(d.detail || 'Lỗi feedback'); return; }
+                toast('Cảm ơn phản hồi'); e.target.reset();
+            };
+
+            const chatForm = document.getElementById('chatForm');
+            chatForm.onsubmit = (e) => {
+                e.preventDefault();
+                const input = document.getElementById('chatInput');
+                const text = input.value.trim();
+                if (!text) return;
+                pushMsg('user', text);
+                input.value = '';
+                setTimeout(() => pushMsg('bot', reply(text)), 450);
+            };
+        }
+
+        function pushMsg(who, text) {
+            const box = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = `msg ${who}`;
+            div.textContent = text;
+            box.append(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function reply(text) {
+            const t = text.toLowerCase();
+            if (t.includes('model')) return 'Model đang chạy active: hot-swap không downtime. Bạn muốn activate release nào?';
+            if (t.includes('predict') || t.includes('ảnh')) return 'Để dự đoán, vào trang Dự đoán, chọn cây và tải ảnh lá rõ nét.';
+            if (t.includes('lỗi') || t.includes('error')) return 'Bạn có thể khoá cứng tạm, xem Logs trong Admin, rồi rollback release cũ.';
+            return 'Mình là bot hỗ trợ nhanh. Bạn có thể để lại email ở form Liên hệ để được trợ giúp chi tiết hơn.';
+        }
+    </script>
+</head>
+
+<body>
+    <div class="navbar">
+        <div><strong>LeafGuard</strong></div>
+        <div class="nav-links">
+            <a href="/frontend2/index.html">Trang chủ</a>
+            <a href="/frontend2/predict.html">Dự đoán</a>
+            <a href="/frontend2/support.html">Hỗ trợ</a>
+        </div>
+    </div>
+    <div class="main" style="padding-top:90px;">
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px,1fr));">
+            <div class="card">
+                <h3>Liên hệ</h3>
+                <form id="contactForm" class="grid">
+                    <div class="form-floating"><input name="name" class="input" placeholder=" "
+                            required><label>Tên</label></div>
+                    <div class="form-floating"><input name="email" type="email" class="input" placeholder=" "
+                            required><label>Email</label></div>
+                    <div class="form-floating"><textarea name="message" class="input" rows="3" placeholder=" "
+                            required></textarea><label>Nội dung</label></div>
+                    <button class="btn">Gửi</button>
+                </form>
+            </div>
+            <div class="card">
+                <h3>Góp ý</h3>
+                <form id="feedbackForm" class="grid">
+                    <div class="form-floating"><textarea name="message" class="input" rows="3" placeholder=" "
+                            required></textarea><label>Góp ý</label></div>
+                    <div class="form-floating"><input name="rating" type="number" min="1" max="5" class="input"
+                            placeholder=" "><label>Đánh giá 1-5</label></div>
+                    <button class="btn">Gửi feedback</button>
+                </form>
+            </div>
+            <div class="card">
+                <h3>Chatbot hỗ trợ nhanh</h3>
+                <div class="chatbox">
+                    <div id="chatMessages" class="chat-messages">
+                        <div class="msg bot">Xin chào! Bạn cần hỗ trợ gì? (Demo bot trả lời nhanh)</div>
+                    </div>
+                    <form id="chatForm" class="chat-input">
+                        <input id="chatInput" class="input" placeholder="Nhập câu hỏi...">
+                        <button class="btn" type="submit">Gửi</button>
+                    </form>
+                    <p class="muted" style="margin:0; font-size:13px;">Bot demo, chưa nối backend. Với yêu cầu chi tiết,
+                        hãy dùng form Liên hệ.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="toast"></div>
+</body>
+
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Agri AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+</head>
+
+<body class="min-h-screen bg-slate-950 text-slate-50">
+    <div class="gradient-bg"></div>
+
+    <header class="fixed inset-x-0 top-0 z-30">
+        <div
+            class="mx-auto mt-4 flex max-w-6xl items-center justify-between rounded-full border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-2xl shadow-xl shadow-emerald-900/40">
+            <div class="flex items-center gap-3">
+                <a href="/"
+                    class="flex h-11 w-11 items-center justify-center rounded-full border border-emerald-300/40 bg-gradient-to-br from-emerald-400/30 to-cyan-300/30 text-xl">🌿</a>
+                <div>
+                    <div class="text-sm uppercase tracking-[0.24em] text-emerald-200">Agri AI</div>
+                    <div class="text-lg font-semibold">Bảng quản trị</div>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                <a href="/upload.html" class="nav-pill nav-underline">Tải ảnh</a>
+                <a href="/feedback.html" class="nav-pill nav-underline">Feedback</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 mx-auto max-w-6xl space-y-10 px-4 pb-16 pt-32">
+        <section class="glass-panel glow-card p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="eyebrow">Đăng nhập</p>
+                    <h1 class="text-3xl font-extrabold">Quản lý log & feedback</h1>
+                </div>
+                <span class="pill">Private</span>
+            </div>
+            <div class="grid gap-4 md:grid-cols-[1.1fr,0.9fr]">
+                <div class="space-y-3">
+                    <label class="floating-group">
+                        <input id="adminKey" type="password" class="input-box w-full" placeholder=" " />
+                        <span>Admin password (X-Admin-Key)</span>
+                    </label>
+                    <button id="btnLoad" class="primary-btn">Tải dữ liệu</button>
+                    <div id="adminStatus" class="text-sm text-emerald-200 hidden">Đang kiểm tra...</div>
+                </div>
+                <div class="space-y-2 text-sm text-slate-200/80">
+                    <div class="info-card">Header: X-Admin-Key. Đổi password bằng biến môi trường ADMIN_PASSWORD.</div>
+                    <div class="info-card">Có thể xoá log tải lên hoặc feedback công khai từ nút bên dưới.</div>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <button id="btnClearUploads" class="pill">Xoá log tải ảnh</button>
+                <button id="btnClearFeedback" class="pill">Xoá feedback</button>
+                <button id="btnDownloadUploads" class="pill">Tải log tải ảnh</button>
+                <button id="btnDownloadFeedback" class="pill">Tải log feedback</button>
+            </div>
+        </section>
+
+        <section class="glass-panel glow-card p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="section-title text-2xl">Log tải ảnh</h2>
+                <span class="pill" id="uploadCount">0 bản ghi</span>
+            </div>
+            <div class="overflow-x-auto rounded-2xl border border-white/10">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-white/5 text-emerald-100">
+                        <tr>
+                            <th class="px-3 py-2 text-left">Thời gian</th>
+                            <th class="px-3 py-2 text-left">IP</th>
+                            <th class="px-3 py-2 text-left">Cây</th>
+                            <th class="px-3 py-2 text-left">Bệnh</th>
+                            <th class="px-3 py-2 text-left">Conf</th>
+                            <th class="px-3 py-2 text-left">Tệp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="uploadTable" class="divide-y divide-white/10"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="glass-panel glow-card p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="section-title text-2xl">Feedback công khai</h2>
+                <span class="pill" id="feedbackCount">0 bản ghi</span>
+            </div>
+            <div id="adminFeedbackList" class="grid gap-3 md:grid-cols-2"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-white/10 bg-slate-950/80 backdrop-blur-xl">
+        <div
+            class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-slate-300 md:flex-row md:items-center md:justify-between">
+            <div class="space-y-1">
+                <div>Agri AI SaaS · Admin</div>
+                <div class="text-emerald-200">Facebook: https://www.facebook.com/17.th05.2009</div>
+                <div class="text-emerald-200">Zalo: Bùi Lê Đan Huy</div>
+                <div class="text-emerald-200">Phone: 0356162193 · Email: builedanhuygov@gmail.com</div>
+            </div>
+            <div class="flex flex-wrap gap-4">
+                <a class="hover:text-emerald-200" href="/upload.html">Tải ảnh</a>
+                <a class="hover:text-emerald-200" href="/feedback.html">Feedback</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/admin.js"></script>
+</body>
+
+</html>

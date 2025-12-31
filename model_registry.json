@@ -1,0 +1,472 @@
+{
+  "D:\\huy\\leaf-disease-detector-1\\models\\chili.h5": {
+    "status": "FAIL",
+    "backend": "cnn",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767016038.0193288
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\chili_AI_model_package": {
+    "status": "FAIL",
+    "backend": "torch",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1766999265.0797074
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\corn.h5": {
+    "status": "OK",
+    "backend": "tf",
+    "input_size": 256,
+    "labels": [
+      "class_0",
+      "class_1",
+      "class_2",
+      "class_3"
+    ],
+    "validation_score": 0.333551824092865,
+    "last_error": null,
+    "blacklist": false,
+    "updated_ts": 1767041665.0032246
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\dummy224.keras": {
+    "status": "OK",
+    "backend": "tf",
+    "input_size": 224,
+    "labels": [
+      "class_0",
+      "class_1",
+      "class_2"
+    ],
+    "validation_score": 0.3334805369377136,
+    "last_error": null,
+    "blacklist": false,
+    "updated_ts": 1767013507.5665867
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\peanut.h5": {
+    "status": "OK",
+    "backend": "tf",
+    "input_size": 256,
+    "labels": [
+      "class_0",
+      "class_1",
+      "class_2",
+      "class_3",
+      "class_4"
+    ],
+    "validation_score": 0.27476850152015686,
+    "last_error": null,
+    "blacklist": false,
+    "updated_ts": 1767105295.9675698
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\Potato.keras": {
+    "status": "FAIL",
+    "backend": "cnn",
+    "input_size": 256,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767016045.3998158
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\PumpkinLeaf_AI_System_FINAL_READY": {
+    "status": "FAIL",
+    "backend": "torch",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1766999267.7219057
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\rice.safetensors": {
+    "status": "FAIL",
+    "backend": "vit",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767016051.797949
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\rices.safetensors": {
+    "status": "FAIL",
+    "backend": "vit",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1766999267.7252493
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\rice_AI_model_package": {
+    "status": "FAIL",
+    "backend": "torch",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1766999267.727691
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\tomato": {
+    "status": "FAIL",
+    "backend": "torch",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1766999267.7296348
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\chili_AI_model_package\\chili_disease_tier2_resnet50.h5": {
+    "status": "OK",
+    "backend": "tf",
+    "input_size": 224,
+    "labels": [
+      "class_0",
+      "class_1",
+      "class_2",
+      "class_3",
+      "class_4",
+      "class_5",
+      "class_6",
+      "class_7"
+    ],
+    "validation_score": 0.14094573259353638,
+    "last_error": null,
+    "blacklist": false,
+    "updated_ts": 1767105293.5992177
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\chili_AI_model_package\\chili_disease_tier2_resnet50_savedmodel": {
+    "status": "FAIL",
+    "backend": "torch",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1766999269.6373582
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\PumpkinLeaf_AI_System_FINAL_READY\\demo": {
+    "status": "FAIL",
+    "backend": "torch",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1766999269.6394053
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\PumpkinLeaf_AI_System_FINAL_READY\\heatmaps": {
+    "status": "FAIL",
+    "backend": "torch",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1766999269.6420186
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\PumpkinLeaf_AI_System_FINAL_READY\\logs": {
+    "status": "FAIL",
+    "backend": "torch",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1766999269.6448965
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\PumpkinLeaf_AI_System_FINAL_READY\\models": {
+    "status": "FAIL",
+    "backend": "torch",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1766999269.646777
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\PumpkinLeaf_AI_System_FINAL_READY\\pipeline": {
+    "status": "FAIL",
+    "backend": "torch",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1766999269.6486104
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\rice_AI_model_package\\rice_disease_resnet50.h5": {
+    "status": "OK",
+    "backend": "tf",
+    "input_size": 224,
+    "labels": [
+      "class_0",
+      "class_1",
+      "class_2",
+      "class_3"
+    ],
+    "validation_score": 0.43149641156196594,
+    "last_error": null,
+    "blacklist": false,
+    "updated_ts": 1767105304.9556499
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\rice_AI_model_package\\rice_tier1_detector.tflite": {
+    "status": "OK",
+    "backend": "tflite",
+    "input_size": 224,
+    "labels": [
+      "class_0"
+    ],
+    "validation_score": 1.0,
+    "last_error": null,
+    "blacklist": false,
+    "updated_ts": 1767105305.7638521
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\tomato\\best_model.weights.h5": {
+    "status": "FAIL",
+    "backend": "cnn",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767016054.8255267
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\tomato\\best_mtl_model.weights.h5": {
+    "status": "FAIL",
+    "backend": "cnn",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767016054.8300214
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\tomato\\best_mtl_model_phase1.weights.h5": {
+    "status": "FAIL",
+    "backend": "cnn",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767016054.833843
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\tomato\\best_mtl_model_phase2.weights (2).h5": {
+    "status": "FAIL",
+    "backend": "cnn",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767016054.8367522
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\tomato\\efficientnetb0_notop (2).h5": {
+    "status": "FAIL",
+    "backend": "cnn",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767016054.8400235
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\tomato\\segmentation_multi_task_model.keras": {
+    "status": "FAIL",
+    "backend": "cnn",
+    "input_size": 128,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767016057.9998057
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\PumpkinLeaf_AI_System_FINAL_READY\\models\\efficientnetb3.keras": {
+    "status": "OK",
+    "backend": "tf",
+    "input_size": 224,
+    "labels": [
+      "class_0",
+      "class_1",
+      "class_2",
+      "class_3",
+      "class_4"
+    ],
+    "validation_score": 0.201974019408226,
+    "last_error": null,
+    "blacklist": false,
+    "updated_ts": 1767105300.3151102
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\PumpkinLeaf_AI_System_FINAL_READY\\models\\resnet50.keras": {
+    "status": "OK",
+    "backend": "tf",
+    "input_size": 224,
+    "labels": [
+      "class_0",
+      "class_1",
+      "class_2",
+      "class_3",
+      "class_4"
+    ],
+    "validation_score": 0.20349259674549103,
+    "last_error": null,
+    "blacklist": false,
+    "updated_ts": 1767105302.7816093
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\chili_AI_model_package\\chili_disease_tier2_resnet50_savedmodel\\variables": {
+    "status": "FAIL",
+    "backend": "torch",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1766999279.0020285
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\chili_AI_model_package\\chili_disease_tier2_resnet50.tflite": {
+    "status": "OK",
+    "backend": "tflite",
+    "input_size": 224,
+    "labels": [
+      "class_0",
+      "class_1",
+      "class_2",
+      "class_3",
+      "class_4",
+      "class_5",
+      "class_6",
+      "class_7"
+    ],
+    "validation_score": 0.14069189131259918,
+    "last_error": null,
+    "blacklist": false,
+    "updated_ts": 1767105294.2996695
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\chili_AI_model_package\\chili_disease_tier2_resnet50_savedmodel\\variables\\chili_disease_tier2_resnet50.tflite": {
+    "status": "OK",
+    "backend": "tflite",
+    "input_size": 224,
+    "labels": [
+      "class_0",
+      "class_1",
+      "class_2",
+      "class_3",
+      "class_4",
+      "class_5",
+      "class_6",
+      "class_7"
+    ],
+    "validation_score": 0.14072920382022858,
+    "last_error": null,
+    "blacklist": false,
+    "updated_ts": 1767105295.0116498
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\rice_AI_model_package\\rice_disease_resnet50.tflite": {
+    "status": "OK",
+    "backend": "tflite",
+    "input_size": 224,
+    "labels": [
+      "class_0",
+      "class_1",
+      "class_2",
+      "class_3"
+    ],
+    "validation_score": 0.43046116828918457,
+    "last_error": null,
+    "blacklist": false,
+    "updated_ts": 1767105305.6937184
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\tomato\\segmentation_multi_task_model.tflite": {
+    "status": "OK",
+    "backend": "tflite",
+    "input_size": 128,
+    "labels": [
+      "class_0"
+    ],
+    "validation_score": 1.0,
+    "last_error": null,
+    "blacklist": false,
+    "updated_ts": 1767105306.8448737
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\chili_AI_model_package\\chili\\chili.h5": {
+    "status": "FAIL",
+    "backend": "cnn",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767016038.080986
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\potato": {
+    "status": "FAIL",
+    "backend": "vit",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767019596.088169
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\potato\\model.safetensors": {
+    "status": "FAIL",
+    "backend": "vit",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767019596.0908163
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\rice": {
+    "status": "FAIL",
+    "backend": "hf",
+    "input_size": 224,
+    "labels": [
+      "Bacterialblight",
+      "Blast",
+      "Brownspot",
+      "Healthy",
+      "Tungro"
+    ],
+    "validation_score": 0.0,
+    "last_error": "'height'",
+    "blacklist": true,
+    "updated_ts": 1767019602.1697745
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\rice\\model.safetensors": {
+    "status": "FAIL",
+    "backend": "hf",
+    "input_size": 224,
+    "labels": [
+      "Bacterialblight",
+      "Blast",
+      "Brownspot",
+      "Healthy",
+      "Tungro"
+    ],
+    "validation_score": 0.0,
+    "last_error": "'height'",
+    "blacklist": true,
+    "updated_ts": 1767019602.7941039
+  },
+  "D:\\huy\\leaf-disease-detector-1\\models\\tomato\\model (2).safetensors": {
+    "status": "FAIL",
+    "backend": "vit",
+    "input_size": 224,
+    "labels": [],
+    "validation_score": 0.0,
+    "last_error": "Load failed",
+    "blacklist": true,
+    "updated_ts": 1767019605.4324179
+  }
+}

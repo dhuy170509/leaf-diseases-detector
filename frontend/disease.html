@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Disease Info • LeafGuard AI</title>
+    <link rel="stylesheet" href="/static/frontend/style.css">
+</head>
+
+<body>
+    <div class="main card">
+        <h2 class="section-title">Thu vien benh</h2>
+        <div id="list" class="grid" style="grid-template-columns: repeat(auto-fit,minmax(220px,1fr));"></div>
+    </div>
+    <script type="module">
+        const data = [
+            { id: 'bacterial_spot', name: 'Bacterial Spot', crop: 'Tomato', severity: 'Trung binh', tips: 'Cat la benh, luan canh, dong goc.' },
+            { id: 'late_blight', name: 'Late Blight', crop: 'Potato', severity: 'Nang', tips: 'Thuoc goc mancozeb, loai bo tan du.' },
+        ];
+        const list = document.getElementById('list');
+        data.forEach(d => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.id = d.id;
+            card.innerHTML = `<h3 class="section-title">${d.name}</h3>
+        <div class="muted">Cay: ${d.crop}</div>
+        <div class="muted">Muc do: ${d.severity}</div>
+        <div class="muted">Khuyen nghi: ${d.tips}</div>`;
+            list.append(card);
+        });
+        if (location.hash) {
+            const t = document.querySelector(location.hash);
+            if (t) t.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+
+</html>

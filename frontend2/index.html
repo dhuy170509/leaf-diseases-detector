@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>LeafGuard AI</title>
+    <link rel="stylesheet" href="/static/frontend2/style.css">
+    <script type="module">
+        import { animateHero, animateIn, registerReveal, initFloatingChat } from '/static/frontend2/app.js';
+        window.addEventListener('DOMContentLoaded', () => {
+            animateHero();
+            animateIn('.hero-panel');
+            registerReveal('.card, .pill, .chip');
+            initFloatingChat({ title: 'LeafGuard AI Chat', apiEndpoint: '/chat', allowClientKey: false });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="bg-grid"></div>
+    <div class="navbar">
+        <div class="flex" style="gap:10px;">
+            <strong>LeafGuard</strong>
+        </div>
+        <div class="nav-links">
+            <a href="/frontend2/index.html">Trang chủ</a>
+            <a href="/frontend2/predict.html">Dự đoán</a>
+            <a href="/frontend2/disease.html">Thư viện bệnh</a>
+            <a href="/frontend2/admin.html">Quản trị</a>
+            <a href="/frontend2/support.html">Hỗ trợ</a>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="orb a"></div>
+        <div class="orb b"></div>
+        <div class="hero hero-banner">
+            <div>
+                <div class="pill-lg accent" style="display:inline-flex; align-items:center; gap:8px;">🌿 AGRI AI • Plant
+                    Health Cloud</div>
+                <div class="eyebrow">MODERN AI • LOCAL-FIRST • GREEN SAAS</div>
+                <h1 class="display-title">NỀN TẢNG AI PHÁT HIỆN BỆNH CÂY TRỒNG</h1>
+                <p class="muted">Dự đoán bệnh lá, gợi ý xử lý chuẩn Bộ Nông nghiệp, chat AI realtime, và quản lý liên hệ
+                    an toàn.</p>
+                <div class="cta-row">
+                    <a href="/frontend2/predict.html" class="btn" style="min-width:180px; text-align:center;">Tải ảnh lá
+                        cây</a>
+                    <a href="/frontend2/disease.html" class="btn ghost" style="min-width:170px; text-align:center;">Mô
+                        hình sẵn sàng</a>
+                </div>
+                <div class="route-chips">
+                    <span class="chip">/predict</span>
+                    <span class="chip">/chat</span>
+                    <span class="chip">/contact</span>
+                </div>
+            </div>
+            <div class="card hero-panel">
+                <div class="flex" style="justify-content:space-between; align-items:center;">
+                    <div class="pill">Ensemble</div>
+                    <div class="muted">Local-only • CPU</div>
+                </div>
+                <div class="panel-grid">
+                    <div class="info-box">
+                        <div class="muted" style="font-size:12px;">Privacy</div>
+                        <div style="font-weight:700;">Local inference</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="muted" style="font-size:12px;">Crops</div>
+                        <div style="font-weight:700;">Lúa • Mận</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="muted" style="font-size:12px;">API</div>
+                        <div style="font-weight:700;">Flask</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="muted" style="font-size:12px;">Status</div>
+                        <div style="font-weight:700;">Sẵn sàng</div>
+                    </div>
+                </div>
+                <div class="hero-icon">🍃</div>
+            </div>
+        </div>
+
+        <div class="grid" style="margin-top:24px; grid-template-columns: 1.2fr 0.8fr; gap:20px;">
+            <div class="card glass">
+                <h3>Trải nghiệm mượt mà</h3>
+                <div class="subgrid">
+                    <div class="pill"><span class="dot"></span>Hot-swap zero downtime</div>
+                    <div class="pill"><span class="dot"></span>Integrity gate</div>
+                    <div class="pill"><span class="dot"></span>Rollback tự động</div>
+                    <div class="pill"><span class="dot"></span>Dash realtime</div>
+                </div>
+                <p class="muted" style="margin-top:12px;">Kiến trúc ACTIVE/STANDBY với kiểm thử trước khi promote. Admin
+                    UI kiểm soát khoá cứng, logs và releases.</p>
+            </div>
+            <div class="card" style="display:flex; flex-direction:column; gap:12px;">
+                <h3>Điểm nhấn giao diện</h3>
+                <div class="pill"><span class="dot"></span>Glassmorphism + gradient nền</div>
+                <div class="pill"><span class="dot"></span>Cards slide-in, hover depth</div>
+                <div class="pill"><span class="dot"></span>Responsive lưới mobile-first</div>
+                <div class="pill"><span class="dot"></span>Toast, progress, dropdown search</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast"></div>
+</body>
+
+</html>

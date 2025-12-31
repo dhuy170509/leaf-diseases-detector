@@ -3,7 +3,6 @@ import multer from 'multer';
 import { predictController } from '../controllers/predictController.js';
 import weatherService from '../services/weatherService.js';
 import modelPerformanceService from '../services/modelPerformanceService.js';
-import bestLeafAIService from '../services/bestLeafAIService.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -185,182 +184,50 @@ router.get('/models/weights', async (req, res) => {
 
 // POST /api/predict-h5 - Predict using EfficientNetB0 H5 model
 router.post('/predict-h5', upload.single('image'), async (req, res) => {
-    const startTime = Date.now();
-    try {
-        const { predictWithH5Safe, formatPredictionResult } = await import('../services/efficientNetH5Service.js');
-
-        // Check image
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                error: 'No image provided',
-                message: 'Please upload an image file using the "image" field'
-            });
-        }
-
-        // Save image to temp file
-        const fs = require('fs');
-        const path = require('path');
-        const tempDir = path.join(__dirname, '../../temp');
-
-        if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir, { recursive: true });
-        }
-
-        const tempImagePath = path.join(tempDir, `temp_${Date.now()}_${req.file.originalname}`);
-        fs.writeFileSync(tempImagePath, req.file.buffer);
-
-        console.log(`📸 Saved temp image: ${tempImagePath}`);
-
-        try {
-            // Predict with H5 model
-            const prediction = await predictWithH5Safe(tempImagePath);
-
-            // Format result
-            const formattedResult = formatPredictionResult(prediction);
-
-            // Add processing time
-            formattedResult.processing_time_ms = Date.now() - startTime;
-
-            return res.json({
-                success: true,
-                data: formattedResult
-            });
-        } finally {
-            // Clean up temp file
-            if (fs.existsSync(tempImagePath)) {
-                fs.unlinkSync(tempImagePath);
-                console.log(`🗑️  Cleaned up temp image`);
-            }
-        }
-    } catch (error) {
-        console.error('❌ H5 prediction error:', error);
-        return res.status(500).json({
-            success: false,
-            error: error instanceof Error ? error.message : 'Prediction failed',
-            processing_time_ms: Date.now() - startTime
+    // HARD RESET: no model execution. Validate upload and return standardized response.
+    if (!req.file) {
+        return res.status(400).json({
+            error: 'No image provided',
+            message: 'Please upload an image file using the "image" field'
         });
     }
+
+    return res.status(200).json({
+        status: 'NO_MODEL_INSTALLED',
+        message: 'No AI model is currently installed.'
+    });
 });
 
 // POST /api/predict-plant - Predict using Plant Disease Model H5
 router.post('/predict-plant', upload.single('image'), async (req, res) => {
-    const startTime = Date.now();
-    try {
-        const { predictWithPlantModelSafe, formatPlantModelResult } = await import('../services/plantModelH5Service.js');
-
-        // Check image
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                error: 'No image provided',
-                message: 'Please upload an image file using the "image" field'
-            });
-        }
-
-        // Save image to temp file
-        const fs = require('fs');
-        const path = require('path');
-        const tempDir = path.join(__dirname, '../../temp');
-
-        if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir, { recursive: true });
-        }
-
-        const tempImagePath = path.join(tempDir, `temp_${Date.now()}_${req.file.originalname}`);
-        fs.writeFileSync(tempImagePath, req.file.buffer);
-
-        console.log(`📸 Saved temp image: ${tempImagePath}`);
-
-        try {
-            // Predict with Plant Model
-            const prediction = await predictWithPlantModelSafe(tempImagePath);
-
-            // Format result
-            const formattedResult = formatPlantModelResult(prediction);
-
-            // Add processing time
-            formattedResult.processing_time_ms = Date.now() - startTime;
-
-            return res.json({
-                success: true,
-                data: formattedResult
-            });
-        } finally {
-            // Clean up temp file
-            if (fs.existsSync(tempImagePath)) {
-                fs.unlinkSync(tempImagePath);
-                console.log(`🗑️  Cleaned up temp image`);
-            }
-        }
-    } catch (error) {
-        console.error('❌ Plant model prediction error:', error);
-        return res.status(500).json({
-            success: false,
-            error: error instanceof Error ? error.message : 'Prediction failed',
-            processing_time_ms: Date.now() - startTime
+    // HARD RESET: no model execution. Validate upload and return standardized response.
+    if (!req.file) {
+        return res.status(400).json({
+            error: 'No image provided',
+            message: 'Please upload an image file using the "image" field'
         });
     }
+
+    return res.status(200).json({
+        status: 'NO_MODEL_INSTALLED',
+        message: 'No AI model is currently installed.'
+    });
 });
 
 // POST /api/predict-mango - Predict using Mango Disease Model H5
 router.post('/predict-mango', upload.single('image'), async (req, res) => {
-    const startTime = Date.now();
-    try {
-        const { predictWithMangoModelSafe, formatMangoModelResult } = await import('../services/mangoModelH5Service.js');
-
-        // Check image
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                error: 'No image provided',
-                message: 'Please upload an image file using the "image" field'
-            });
-        }
-
-        // Save image to temp file
-        const fs = require('fs');
-        const path = require('path');
-        const tempDir = path.join(__dirname, '../../temp');
-
-        if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir, { recursive: true });
-        }
-
-        const tempImagePath = path.join(tempDir, `temp_${Date.now()}_${req.file.originalname}`);
-        fs.writeFileSync(tempImagePath, req.file.buffer);
-
-        console.log(`📸 Saved temp image for mango: ${tempImagePath}`);
-
-        try {
-            // Predict with Mango Model
-            const prediction = await predictWithMangoModelSafe(tempImagePath);
-
-            // Format result
-            const formattedResult = formatMangoModelResult(prediction);
-
-            // Add processing time
-            formattedResult.processing_time_ms = Date.now() - startTime;
-
-            return res.json({
-                success: true,
-                data: formattedResult
-            });
-        } finally {
-            // Clean up temp file
-            if (fs.existsSync(tempImagePath)) {
-                fs.unlinkSync(tempImagePath);
-                console.log(`🗑️  Cleaned up temp image`);
-            }
-        }
-    } catch (error) {
-        console.error('❌ Mango model prediction error:', error);
-        return res.status(500).json({
-            success: false,
-            error: error instanceof Error ? error.message : 'Prediction failed',
-            processing_time_ms: Date.now() - startTime
+    // HARD RESET: no model execution. Validate upload and return standardized response.
+    if (!req.file) {
+        return res.status(400).json({
+            error: 'No image provided',
+            message: 'Please upload an image file using the "image" field'
         });
     }
+
+    return res.status(200).json({
+        status: 'NO_MODEL_INSTALLED',
+        message: 'No AI model is currently installed.'
+    });
 });
 
 // POST /api/predict-multi - Multi-model ensemble prediction (6 models)
@@ -374,26 +241,11 @@ router.post('/predict-multi', upload.single('image'), async (req, res) => {
                 error: 'No image provided'
             });
         }
-
-        console.log('🔄 Multi-model prediction starting...');
-
-        // This would use the multiModelH5Service
-        // For now, return a placeholder
-        const result = {
-            success: true,
-            disease: 'Disease detected by ensemble',
-            confidence: 0.85,
-            severity: 'High',
-            votes: {
-                'Disease A': 4,
-                'Disease B': 2
-            },
-            models_used: 6,
-            processing_time_ms: Date.now() - startTime,
-            note: 'Ensemble prediction using 6 trained models'
-        };
-
-        return res.json(result);
+        // HARD RESET: no ensemble execution. Return standardized response.
+        return res.status(200).json({
+            status: 'NO_MODEL_INSTALLED',
+            message: 'No AI model is currently installed.'
+        });
     } catch (error) {
         console.error('❌ Multi-model prediction error:', error);
         return res.status(500).json({
@@ -406,60 +258,17 @@ router.post('/predict-multi', upload.single('image'), async (req, res) => {
 
 // POST /api/predict-best - Best Leaf AI model prediction (NEW)
 router.post('/predict-best', upload.single('image'), async (req, res) => {
-    const startTime = Date.now();
-
-    try {
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                error: 'No image provided'
-            });
-        }
-
-        console.log('🌟 Best Leaf AI prediction starting...');
-
-        // Load model if not already loaded
-        const loaded = await bestLeafAIService.loadModel();
-        if (!loaded) {
-            return res.status(503).json({
-                success: false,
-                error: 'best_leaf_ai.h5 model not available',
-                processing_time_ms: Date.now() - startTime
-            });
-        }
-
-        // Run prediction
-        const prediction = await bestLeafAIService.predict(req.file.buffer);
-
-        if (!prediction) {
-            return res.status(500).json({
-                success: false,
-                error: 'Prediction failed',
-                processing_time_ms: Date.now() - startTime
-            });
-        }
-
-        console.log(`✅ Prediction: ${prediction.disease} (${(prediction.confidence * 100).toFixed(2)}%)`);
-
-        return res.json({
-            success: true,
-            source: 'best_leaf_ai.h5',
-            prediction: prediction.disease,
-            confidence: prediction.confidence,
-            probability: prediction.probability,
-            severity: prediction.severity,
-            treatment: prediction.treatment,
-            processing_time_ms: Date.now() - startTime
-        });
-
-    } catch (error) {
-        console.error('❌ Best Leaf AI prediction error:', error);
-        return res.status(500).json({
-            success: false,
-            error: error instanceof Error ? error.message : 'Prediction failed',
-            processing_time_ms: Date.now() - startTime
+    // HARD RESET: no model execution. Validate upload and return standardized response.
+    if (!req.file) {
+        return res.status(400).json({
+            error: 'No image provided'
         });
     }
+
+    return res.status(200).json({
+        status: 'NO_MODEL_INSTALLED',
+        message: 'No AI model is currently installed.'
+    });
 });
 
 
@@ -467,57 +276,7 @@ router.post('/predict-best', upload.single('image'), async (req, res) => {
 router.get('/models', (req, res) => {
     return res.json({
         success: true,
-        models: [
-            {
-                name: 'Best Leaf AI 🌟',
-                type: 'h5-premium',
-                endpoint: '/api/predict-best',
-                crop: 'General',
-                status: 'active',
-                accuracy: '95%+',
-                description: 'NEW! Premium AI model with highest accuracy - best_leaf_ai.h5 (50.8 MB)'
-            },
-            {
-                name: 'Multi-Model Ensemble (6 Models)',
-                type: 'h5-ensemble',
-                endpoint: '/api/predict-multi',
-                crop: 'General',
-                status: 'active',
-                description: 'Voting ensemble using 6 trained H5 models'
-            },
-            {
-                name: 'Mango Disease Model',
-                type: 'h5',
-                endpoint: '/api/predict-mango',
-                crop: 'Mango',
-                status: 'active',
-                description: 'Specialized model for mango leaf disease detection'
-            },
-            {
-                name: 'Plant Disease Model',
-                type: 'h5',
-                endpoint: '/api/predict-plant',
-                crop: 'General',
-                status: 'active',
-                description: 'Custom trained plant disease detection model'
-            },
-            {
-                name: 'EfficientNetB0',
-                type: 'h5',
-                endpoint: '/api/predict-h5',
-                crop: 'General',
-                status: 'active',
-                description: 'Pre-trained EfficientNetB0 model for plant disease detection'
-            },
-            {
-                name: 'Ensemble (ResNet50 + MobileNetV2 + InceptionV3)',
-                type: 'ensemble',
-                endpoint: '/api/predict',
-                crop: 'General',
-                status: 'active',
-                description: 'Ensemble voting system using 3 pre-trained models'
-            }
-        ]
+        models: []
     });
 });
 
