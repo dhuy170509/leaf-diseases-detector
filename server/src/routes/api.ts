@@ -1,6 +1,7 @@
 import express from 'express';
+import fs from 'fs';
 import multer from 'multer';
-import { predictController } from '../controllers/predictController.js';
+import { predictController, PREDICT_MODEL_NAME, PREDICT_MODEL_TYPE } from '../controllers/predictController.js';
 import weatherService from '../services/weatherService.js';
 import modelPerformanceService from '../services/modelPerformanceService.js';
 import path from 'path';
@@ -182,102 +183,57 @@ router.get('/models/weights', async (req, res) => {
     }
 });
 
-// POST /api/predict-h5 - Predict using EfficientNetB0 H5 model
-router.post('/predict-h5', upload.single('image'), async (req, res) => {
-    // HARD RESET: no model execution. Validate upload and return standardized response.
-    if (!req.file) {
-        return res.status(400).json({
-            error: 'No image provided',
-            message: 'Please upload an image file using the "image" field'
-        });
-    }
+// POST /api/predict - Single real prediction pipeline (pixel-analysis-v1)
+router.post('/predict', upload.single('image'), predictController);
 
-    return res.status(200).json({
-        status: 'NO_MODEL_INSTALLED',
-        message: 'No AI model is currently installed.'
-    });
-});
+// Legacy empty-model endpoints removed (predict-h5, predict-plant,
+// predict-mango, predict-multi, predict-best). They previously returned
+// hardcoded NO_MODEL_INSTALLED and misled about system capabilities.
+// Use POST /api/predict instead.
 
-// POST /api/predict-plant - Predict using Plant Disease Model H5
-router.post('/predict-plant', upload.single('image'), async (req, res) => {
-    // HARD RESET: no model execution. Validate upload and return standardized response.
-    if (!req.file) {
-        return res.status(400).json({
-            error: 'No image provided',
-            message: 'Please upload an image file using the "image" field'
-        });
-    }
-
-    return res.status(200).json({
-        status: 'NO_MODEL_INSTALLED',
-        message: 'No AI model is currently installed.'
-    });
-});
-
-// POST /api/predict-mango - Predict using Mango Disease Model H5
-router.post('/predict-mango', upload.single('image'), async (req, res) => {
-    // HARD RESET: no model execution. Validate upload and return standardized response.
-    if (!req.file) {
-        return res.status(400).json({
-            error: 'No image provided',
-            message: 'Please upload an image file using the "image" field'
-        });
-    }
-
-    return res.status(200).json({
-        status: 'NO_MODEL_INSTALLED',
-        message: 'No AI model is currently installed.'
-    });
-});
-
-// POST /api/predict-multi - Multi-model ensemble prediction (6 models)
-router.post('/predict-multi', upload.single('image'), async (req, res) => {
-    const startTime = Date.now();
-
-    try {
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                error: 'No image provided'
-            });
-        }
-        // HARD RESET: no ensemble execution. Return standardized response.
-        return res.status(200).json({
-            status: 'NO_MODEL_INSTALLED',
-            message: 'No AI model is currently installed.'
-        });
-    } catch (error) {
-        console.error('❌ Multi-model prediction error:', error);
-        return res.status(500).json({
-            success: false,
-            error: error instanceof Error ? error.message : 'Prediction failed',
-            processing_time_ms: Date.now() - startTime
-        });
-    }
-});
-
-// POST /api/predict-best - Best Leaf AI model prediction (NEW)
-router.post('/predict-best', upload.single('image'), async (req, res) => {
-    // HARD RESET: no model execution. Validate upload and return standardized response.
-    if (!req.file) {
-        return res.status(400).json({
-            error: 'No image provided'
-        });
-    }
-
-    return res.status(200).json({
-        status: 'NO_MODEL_INSTALLED',
-        message: 'No AI model is currently installed.'
-    });
-});
-
-
-// GET /api/models - List available models
+// GET /api/models - List available models (single real pipeline)
 router.get('/models', (req, res) => {
     return res.json({
         success: true,
-        models: []
+        models: [
+            {
+                name: PREDICT_MODEL_NAME,
+                type: PREDICT_MODEL_TYPE,
+                status: 'OK',
+                endpoint: '/api/predict'
+            }
+        ]
     });
+});
+
+// POST /api/contact - Receive contact/feedback messages (support page).
+// Stores to database/contact_messages.jsonl with real timestamp. No fake reply.
+router.post('/contact', async (req, res) => {
+    try {
+        const { name, email, message, rating, type } = req.body || {};
+        if (!message || typeof message !== 'string' || !message.trim()) {
+            return res.status(400).json({ success: false, error: 'Nội dung (message) là bắt buộc' });
+        }
+        const entry = {
+            type: type || 'contact',
+            name: name || null,
+            email: email || null,
+            message: message.trim().slice(0, 2000),
+            rating: rating === undefined || rating === '' ? null : Number(rating),
+            timestamp: new Date().toISOString(),
+            ip: req.ip
+        };
+        const dbDir = path.join(__dirname, '../../../database');
+        try { fs.mkdirSync(dbDir, { recursive: true }); } catch { /* ignore */ }
+        fs.appendFileSync(path.join(dbDir, 'contact_messages.jsonl'), JSON.stringify(entry) + '\n');
+        return res.json({ success: true, timestamp: entry.timestamp });
+    } catch (error) {
+        console.error('❌ Contact endpoint error:', error);
+        return res.status(500).json({
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
 });
 
 export default router;

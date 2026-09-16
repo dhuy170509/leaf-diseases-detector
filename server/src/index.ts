@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import multer from 'multer';
+import fs from 'fs';
 import path from 'path';
 import { networkInterfaces } from 'os';
 import { fileURLToPath } from 'url';
@@ -41,17 +42,40 @@ function getLocalIP(): string {
 // Enable CORS for all routes
 app.use(cors());
 
-// Redirect old .html pages to root (before static middleware)
-app.use((req, res, next) => {
-  if (req.path.endsWith('.html')) {
-    return res.redirect('/');
-  }
-  next();
-});
-
-// Serve static files from client build folder
+// Serve legacy client build if present (archived under _archive/ — optional)
 const clientBuildPath = path.join(__dirname, '../../client/build');
-app.use(express.static(clientBuildPath));
+try {
+  if (fs.existsSync(clientBuildPath)) {
+    app.use(express.static(clientBuildPath));
+  }
+} catch { /* ignore */ }
+
+// Serve frontend2 (the production-deployed UI) under both /frontend2 and
+// /static/frontend2 (HTML references /static/frontend2/*.css|js).
+// Resolve against multiple candidate dirs so it works in dev (src),
+const frontend2Candidates = [
+  path.join(__dirname, '../../frontend2'),
+  path.join(__dirname, '../frontend2'),
+  path.join(__dirname, 'frontend2'),
+  path.join(process.cwd(), 'frontend2'),
+  path.join(process.cwd(), 'server/../frontend2'),
+];
+let frontend2Path: string | null = null;
+for (const p of frontend2Candidates) {
+  try {
+    if (fs.existsSync(path.join(p, 'predict.html'))) {
+      frontend2Path = p;
+      break;
+    }
+  } catch { /* ignore */ }
+}
+if (frontend2Path) {
+  app.use('/frontend2', express.static(frontend2Path));
+  app.use('/static/frontend2', express.static(frontend2Path));
+  console.log(`📁 Serving frontend2 from ${frontend2Path}`);
+} else {
+  console.warn('⚠️ frontend2 directory not found - /frontend2/* will 404');
+}
 
 // Configure multer for file uploads
 const upload = multer({
@@ -86,19 +110,27 @@ app.get('/', (req, res) => {
   });
 });
 
-// Test API quickly (returns NO_MODEL_INSTALLED status)
+// Test API quickly (reports the single real model status)
 app.get('/api/test-predict', async (req, res) => {
   try {
-    console.log('🧪 Test endpoint hit - no model installed');
-    res.json({ success: false, status: 'NO_MODEL_INSTALLED', message: 'No AI model is currently installed.' });
+    console.log('🧪 Test endpoint hit - pixel-analysis-v1 OK');
+    res.json({ success: true, status: 'OK', model: 'pixel-analysis-v1', message: 'Model installed and ready. POST an image to /api/predict.' });
   } catch (error) {
     console.error('❌ Test error:', error);
     res.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
 
-// Test upload page with chatbot
+// Canonical UI redirect: the legacy inline /test-upload page has been unified
+// into frontend2. Keep the old URL alive via redirect (no 404 for LAN links).
 app.get('/test-upload', (req, res) => {
+  return res.redirect(302, '/frontend2/predict.html');
+});
+
+// Legacy inline test-upload page (DEPRECATED, unreachable - kept only until the
+// markup is split into its own file; the redirect above takes precedence).
+// @ts-ignore legacy unreachable handler
+app.get('/test-upload-legacy-disabled', (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html lang="vi">
@@ -2110,8 +2142,15 @@ app.get('*', (req, res) => {
     return res.status(404).json({ error: 'Not found' });
   }
 
-  // Serve React index.html for all other routes (SPA routing)
+  // Legacy client build was archived to _archive/ - fall through to JSON 404
   const indexPath = path.join(clientBuildPath, 'index.html');
+  if (!fs.existsSync(indexPath)) {
+    return res.status(404).json({
+      error: 'Không tìm thấy',
+      message: 'Trang giao diện chính thức nằm ở /frontend2/predict.html',
+      ui: '/frontend2/predict.html'
+    });
+  }
   res.sendFile(indexPath, (err: any) => {
     if (err) {
       console.error('❌ Lỗi serve index.html:', err);
@@ -2145,9 +2184,13 @@ app.use('*', (req, res) => {
     availableEndpoints: [
       'GET /',
       'GET /health',
-      'GET /test-upload',
+      'GET /frontend2/predict.html',
+      'GET /frontend2/disease.html',
+      'GET /frontend2/support.html',
+      'GET /frontend2/admin.html',
       'POST /api/predict',
       'POST /api/chat',
+      'POST /api/contact',
       'GET /api/diseases',
       'GET /api/diseases/search'
     ]
@@ -2170,14 +2213,14 @@ async function startServer() {
     console.log('🌿 Máy Chủ Nhận Diện Bệnh Lá Cây Đã Khởi Động!');
     console.log(`📍 Server (Local): http://localhost:${PORT}`);
     console.log(`🌐 Server (Network): http://${localIP}:${PORT}`);
-    console.log(`📱 Mobile/Tablet: http://${localIP}:${PORT}/test-upload`);
-    console.log(`🧪 Giao diện test: http://localhost:${PORT}/test-upload`);
+    console.log(`📱 UI chính: http://${localIP}:${PORT}/frontend2/predict.html`);
+    console.log(`🧪 Redirect tương thích: http://localhost:${PORT}/test-upload -> /frontend2/predict.html`);
     console.log(`🏥 Health check: http://${localIP}:${PORT}/health`);
     console.log(`🔍 API dự đoán: http://${localIP}:${PORT}/api/predict`);
     console.log(`💬 API chatbot: http://${localIP}:${PORT}/api/chat`);
     console.log(`📚 API bệnh cây: http://${localIP}:${PORT}/api/diseases`);
     console.log(`⏰ Khởi động lúc: ${new Date().toLocaleString('vi-VN')}`);
-    console.log(`\n🔗 Chia sẻ link này cho mọi người: http://${localIP}:${PORT}/test-upload`);
+    console.log(`\n🔗 Chia sẻ link này cho mọi người: http://${localIP}:${PORT}/frontend2/predict.html`);
   });
 
   server.on('error', (err: any) => {
@@ -2196,3 +2239,5 @@ async function startServer() {
 
 // Bắt đầu server
 startServer();
+
+export default app;

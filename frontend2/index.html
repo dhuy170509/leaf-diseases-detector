@@ -5,13 +5,15 @@
     <meta charset="utf-8">
     <title>LeafGuard AI</title>
     <link rel="stylesheet" href="/static/frontend2/style.css">
+    <script>try{var t=localStorage.getItem('lg-theme');if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}document.documentElement.dataset.theme=t}catch(e){}</script>
     <script type="module">
-        import { animateHero, animateIn, registerReveal, initFloatingChat } from '/static/frontend2/app.js';
+        import { animateHero, animateIn, registerReveal, initBottomNav, initFloatingChat } from '/static/frontend2/app.js';
         window.addEventListener('DOMContentLoaded', () => {
             animateHero();
             animateIn('.hero-panel');
             registerReveal('.card, .pill, .chip');
-            initFloatingChat({ title: 'LeafGuard AI Chat', apiEndpoint: '/chat', allowClientKey: false });
+            initBottomNav();
+            initFloatingChat({ title: 'LeafGuard AI Chat', apiEndpoint: '/api/chat', allowClientKey: false });
         });
     </script>
 </head>
@@ -32,26 +34,24 @@
     </div>
 
     <div class="main">
-        <div class="orb a"></div>
-        <div class="orb b"></div>
         <div class="hero hero-banner">
             <div>
-                <div class="pill-lg accent" style="display:inline-flex; align-items:center; gap:8px;">🌿 AGRI AI • Plant
+                <div class="pill-lg primary" style="display:inline-flex; align-items:center; gap:8px;">🌿 AGRI AI • Plant
                     Health Cloud</div>
                 <div class="eyebrow">MODERN AI • LOCAL-FIRST • GREEN SAAS</div>
                 <h1 class="display-title">NỀN TẢNG AI PHÁT HIỆN BỆNH CÂY TRỒNG</h1>
-                <p class="muted">Dự đoán bệnh lá, gợi ý xử lý chuẩn Bộ Nông nghiệp, chat AI realtime, và quản lý liên hệ
-                    an toàn.</p>
+                <p class="muted">Dự đoán bệnh lá bằng phân tích điểm ảnh, tra cứu thư viện
+                    bệnh, và gửi liên hệ/góp ý.</p>
                 <div class="cta-row">
                     <a href="/frontend2/predict.html" class="btn" style="min-width:180px; text-align:center;">Tải ảnh lá
                         cây</a>
-                    <a href="/frontend2/disease.html" class="btn ghost" style="min-width:170px; text-align:center;">Mô
-                        hình sẵn sàng</a>
+                    <a href="/frontend2/disease.html" class="btn ghost" style="min-width:170px; text-align:center;">Thư
+                        viện bệnh</a>
                 </div>
                 <div class="route-chips">
-                    <span class="chip">/predict</span>
-                    <span class="chip">/chat</span>
-                    <span class="chip">/contact</span>
+                    <span class="chip">POST /api/predict</span>
+                    <span class="chip">GET /api/diseases</span>
+                    <span class="chip">POST /api/contact</span>
                 </div>
             </div>
             <div class="card hero-panel">
@@ -66,18 +66,18 @@
                     </div>
                     <div class="info-box">
                         <div class="muted" style="font-size:12px;">Crops</div>
-                        <div style="font-weight:700;">Lúa • Mận</div>
+                        <div style="font-weight:700;">Nhiều loại cây</div>
                     </div>
                     <div class="info-box">
                         <div class="muted" style="font-size:12px;">API</div>
-                        <div style="font-weight:700;">Flask</div>
+                        <div style="font-weight:700;">Node/Express</div>
                     </div>
                     <div class="info-box">
                         <div class="muted" style="font-size:12px;">Status</div>
                         <div style="font-weight:700;">Sẵn sàng</div>
                     </div>
                 </div>
-                <div class="hero-icon">🍃</div>
+                <div class="hero-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19C5 9 13 4 20 4c0 8-5 15-15 15"/><path d="M5 19c3-5 7-9 11-11"/></svg></div>
             </div>
         </div>
 
@@ -85,13 +85,13 @@
             <div class="card glass">
                 <h3>Trải nghiệm mượt mà</h3>
                 <div class="subgrid">
-                    <div class="pill"><span class="dot"></span>Hot-swap zero downtime</div>
-                    <div class="pill"><span class="dot"></span>Integrity gate</div>
-                    <div class="pill"><span class="dot"></span>Rollback tự động</div>
-                    <div class="pill"><span class="dot"></span>Dash realtime</div>
+                    <div class="pill"><span class="dot"></span>Dự đoán ảnh thật</div>
+                    <div class="pill"><span class="dot"></span>Thư viện bệnh</div>
+                    <div class="pill"><span class="dot"></span>Liên hệ & góp ý</div>
+                    <div class="pill"><span class="dot"></span>Responsive mobile</div>
                 </div>
-                <p class="muted" style="margin-top:12px;">Kiến trúc ACTIVE/STANDBY với kiểm thử trước khi promote. Admin
-                    UI kiểm soát khoá cứng, logs và releases.</p>
+                <p class="muted" style="margin-top:12px;">Một pipeline phân tích duy nhất (pixel-analysis-v1),
+                    một UI duy nhất (frontend2), một backend production (Node/Express).</p>
             </div>
             <div class="card" style="display:flex; flex-direction:column; gap:12px;">
                 <h3>Điểm nhấn giao diện</h3>

@@ -1,7 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
-  moduleFileExtensions: ['ts','tsx','js','jsx','json'],
-  testMatch: ['**/tests/**/*.(spec|test).(ts|tsx|js)'],
+  testEnvironment: 'node',
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  testMatch: ['**/tests/server/**/*.test.(ts|js)'],
+  testTimeout: 60000,
 };

@@ -1,4 +1,3 @@
-.env
 node_modules/
 .vscode/
 dist/
@@ -46,5 +45,9 @@ database/disease_detector.db
 db.sqlite
 database/*.txt
 database/*.log
+database/*.jsonl
 
+# Environment files - never commit real secrets (keep only .env.example tracked)
 .env
+.env.*
+!.env.example

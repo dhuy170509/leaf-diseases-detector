@@ -1,4 +1,4 @@
-name: CI/CD — Deploy Frontend (Vercel) & Backend (Render)
+name: CI — Build, E2E smoke & Deploy (Vercel + Render, Node)
 
 on:
   push:
@@ -17,24 +17,40 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install root dependencies
-        run: npm ci
-
-      - name: Build frontend
-        run: npm run build
-
-      - name: Deploy frontend to Vercel (CLI)
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          npm i -g vercel
-          vercel --prod --token $VERCEL_TOKEN --confirm
+      - name: Install server dependencies
+        run: npm --prefix server ci
 
       - name: Build server
+        run: npm --prefix server run build
+
+      - name: E2E smoke (real predict, no mock)
         run: |
-          cd server
-          npm ci
-          npm run build
+          pip install pillow
+          node server/dist/index.js & echo $! > /tmp/agriai.pid
+          sleep 6
+          python3 -c "from PIL import Image; Image.new('RGB',(224,224),(34,139,34)).save('/tmp/healthy.jpg'); Image.new('RGB',(224,224),(139,69,19)).save('/tmp/diseased.jpg')"
+          H=$(curl -s -X POST http://localhost:8765/api/predict -F "image=@/tmp/healthy.jpg")
+          D=$(curl -s -X POST http://localhost:8765/api/predict -F "image=@/tmp/diseased.jpg")
+          echo "$H" | grep -q '"success":true'
+          echo "$H" | grep -q -v 'NO_MODEL_INSTALLED'
+          echo "$D" | grep -q '"success":true'
+          python3 -c "import json,sys; h=json.loads('''$H'''); d=json.loads('''$D'''); sys.exit(0 if h['prediction']!=d['prediction'] else 1)"
+          curl -sf http://localhost:8765/api/models | grep -q 'pixel-analysis-v1'
+          curl -sf http://localhost:8765/frontend2/predict.html > /dev/null
+          curl -sf http://localhost:8765/frontend2/disease.html > /dev/null
+          curl -sf http://localhost:8765/frontend2/admin.html > /dev/null
+          kill $(cat /tmp/agriai.pid)
+          echo "E2E smoke passed"
+
+      - name: Deploy to Vercel (CLI)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npm i -g vercel
+          if [ -n "$VERCEL_PROJECT_ID" ]; then vercel pull --yes --environment=production --token $VERCEL_TOKEN; fi
+          vercel --prod --token $VERCEL_TOKEN --confirm
 
       - name: Trigger Render deploy for backend
         if: ${{ secrets.RENDER_API_KEY != '' && secrets.RENDER_SERVICE_ID != '' }}

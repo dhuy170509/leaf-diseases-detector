@@ -1,110 +1,131 @@
-# Leaf Disease Detector
+# AgriAI — Leaf Disease Detector
 
-## Overview
-The Leaf Disease Detector is a **professional-grade web application** powered by **3 trained AI models** (ResNet50, MobileNetV2, InceptionV3) working together with ensemble learning to identify plant diseases with **93-97% accuracy**. Upload leaf images and receive instant diagnosis with treatment recommendations.
+Web app nhận diện bệnh lá cây qua ảnh. Upload ảnh lá, nhận phân tích + gợi ý xử lý.
 
-### ✨ Key Features
-- 🧠 **Ensemble Learning**: 3 AI models voting together for higher accuracy
-- 📸 **Image Analysis**: Pixel-by-pixel analysis with real-time processing
-- 🌾 **50+ Diseases**: Across 10 crops with Vietnamese medical data
-- 🌡️ **Weather Integration**: Real-time weather forecasting with Windy API
-- 📍 **Geolocation**: Browser location + OpenStreetMap address search
-- 💊 **Treatment Advice**: AI-powered recommendations for each disease
-- 🗺️ **Interactive Maps**: Leaflet maps with location markers
-- 🎨 **Advanced UI**: Glassmorphism, dark/light theme, animations
-- 📱 **Mobile Optimized**: Responsive design for phones and tablets
-- 🔐 **Privacy First**: Local image processing, no upload storage
+> Trạng thái hiện tại: backend Node/Express chạy **đúng 1 pipeline thật duy nhất
+> (`pixel-analysis-v1`, phân tích điểm ảnh bằng Jimp)**. Không còn endpoint trả
+> cứng `NO_MODEL_INSTALLED`. Không claim độ chính xác % nào chưa được đo kiểm.
 
-## Project Structure
-The project is organized into several key directories:
+## Chạy nhanh (production stack: Node + frontend2)
 
-- **client**: React SPA with advanced UI (glassmorphism, neumorphic buttons, animations)
-- **server**: Node.js + Express backend with 3 ensemble ML models
-  - **mlModelsService.ts**: ResNet50, MobileNetV2, InceptionV3 ensemble system
-  - **pixelAnalysisService.ts**: Pixel-by-pixel disease detection
-  - **weatherService.ts**: Windy API integration for forecasting
-  - **databaseService.ts**: SQLite storage with 50+ diseases
-  
-- **model**: Training scripts and ML model data
-- **data**: Disease database, crop information, metadata
-- **tests**: Unit tests for prediction accuracy
+Yêu cầu: Node.js 18+.
 
-## Installation
-
-### Prerequisites
-- Node.js (version 14 or higher)
-- Python (version 3.6 or higher)
-- Docker (optional, for containerized deployment)
-
-### Setup
-1. Clone the repository:
-   ```
-   git clone <repository-url>
-   cd leaf-disease-detector
-   ```
-
-2. Install dependencies for the client:
-   ```
-   cd client
-   npm install
-   ```
-
-3. Install dependencies for the server:
-   ```
-   cd server
-   npm install
-   ```
-
-4. Install Python dependencies for the model:
-   ```
-   cd model
-   pip install -r requirements.txt
-   ```
-
-## Running the Application
-
-### Client
-To start the client application, navigate to the `client` directory and run:
-```
-npm start
-```
-The application will be available at `http://localhost:3000`.
-
-### Server
-To start the server application, navigate to the `server` directory and run:
-```
-npm start
-```
-The server will be available at `http://localhost:5000`.
-
-## Usage
-1. Open the client application in your web browser.
-2. Use the image uploader to select and upload an image of a leaf or stem.
-3. View the prediction results displayed on the screen.
-
-## Testing
-To run tests for the client and server applications, use the following commands:
-
-- For the client:
-  ```
-  cd client
-  npm test
-  ```
-
-- For the server:
-  ```
-  cd server
-  npm test
-  ```
-
-## Docker
-To run the application using Docker, you can use the provided `docker-compose.yml` file. Run the following command in the root directory of the project:
-```
-docker-compose up
+```bash
+cd server
+npm install
+npm run build
+npm start          # mặc định PORT 8765
 ```
 
-## Contributing
-Contributions are welcome! Please submit a pull request or open an issue for any suggestions or improvements.
+- UI: http://localhost:8765/frontend2/predict.html (dự đoán), `disease.html`,
+  `support.html`, `admin.html`, `index.html` — 5 trang URL riêng, bottom nav
+  chung, back/forward/refresh native. `/test-upload` redirect về predict.
+- Health: `GET /`, `GET /api/test-predict`
 
-## License
-This project is licensed under the MIT License. See the LICENSE file for details.
+## API (Node/Express)
+
+| Method | Endpoint | Mô tả |
+|---|---|---|
+| POST | `/api/predict` | Nhận `multipart/form-data` field `image` (tối đa 10MB) → trả prediction + confidence + severity + thời gian xử lý thật + timestamp thật |
+| GET | `/api/models` | Liệt kê đúng 1 model đang chạy (`pixel-analysis-v1`) |
+| GET | `/api/test-predict` | Trạng thái model |
+| POST | `/api/contact` | Nhận liên hệ/góp ý `{type, name, email, message, rating}` → lưu `database/contact_messages.jsonl` + timestamp thật |
+| GET | `/api/weather?lat=..&lon=..&days=3` | Dự báo thời tiết |
+| POST | `/api/feedback` | Ghi nhận đúng/sai của dự đoán |
+| GET | `/api/models/performance`, `/api/models/weights` | Hiệu năng/bình chọn ensemble (legacy, giữ nguyên) |
+
+Ví dụ:
+
+```bash
+curl -X POST http://localhost:8765/api/predict -F "image=@leaf.jpg"
+```
+
+Response thật (rút gọn):
+
+```json
+{
+  "success": true,
+  "status": "OK",
+  "model": "pixel-analysis-v1",
+  "prediction": "Lá khỏe mạnh (Healthy Leaf)",
+  "confidence": 0.95,
+  "severity": "HEALTHY",
+  "processing_time_ms": 51,
+  "timestamp": "2026-09-16T12:15:50.287Z"
+}
+```
+
+## Pipeline dự đoán duy nhất
+
+- File: `server/src/services/pixelAnalysisService.ts` (Jimp, quét từng pixel,
+  phân loại màu xanh/nâu/đỏ/vàng/đen, tính severity + spatial pattern).
+- Controller: `server/src/controllers/predictController.ts` — không delay giả,
+  không mock, ảnh xanh cho `Healthy`, ảnh nâu cho `Brown Spot` (đã test thật).
+- Đây là **heuristic cổ điển, không phải CNN đã huấn luyện** — đừng kỳ vọng độ
+  chính xác như model học sâu. Muốn CNN thật: xem mục Python bên dưới.
+
+## Backend Python (tùy chọn, không phải production)
+
+- `app.py` + `hf_model.py`: Flask + HuggingFace ViT
+  (`wambugu71/crop_leaf_diseases_vit`), có cache theo hash ảnh, phát hiện ảnh mờ.
+  Cần `torch`, `transformers`, tải model ~hàng trăm MB.
+- `api_server.py`: FastAPI thử nghiệm (engine ensemble). Lưu ý: file này
+  hard-code `MODELS_ROOT = D:/huy/...` và tự `sys.exit(1)` khi model lỗi nên
+  **sẽ crash trên Render/Railway** nếu chạy nguyên trạng.
+- Production hiện tại là **Node/Express** (theo `vercel.json` + CI). Các file
+  `render.yaml` / `railway.json` vẫn trỏ `uvicorn api_server:app` — cần cập nhật
+  khi chốt deploy Python hoặc chuyển hẳn sang Node.
+
+## Deploy (production duy nhất: Node/Express)
+
+- **Vercel**: import repo, framework preset "Other", `installCommand`
+  `npm --prefix server install`, `buildCommand` `npm --prefix server run build`
+  (đã khai trong `vercel.json` — Vercel tự đọc). Function Node
+  `server/dist/index.js` + static `frontend2/**`. Không cần biến môi trường.
+- **Render**: dùng `render.yaml` (Blueprint) — `env: node`,
+  build `npm --prefix server install && npm --prefix server run build`,
+  start `node server/dist/index.js`, health check `/health`. Auto-deploy theo
+  nhánh main.
+- **Railway**: dùng `railway.json` — Nixpacks build + start tương tự, health
+  check `/health`.
+- CI (`.github/workflows/deploy.yml`): cài server deps → build → E2E smoke
+  (predict ảnh thật, không mock) → deploy Vercel CLI (cần secret
+  `VERCEL_TOKEN`, kèm `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` nếu project đã link)
+  → trigger Render (nếu có `RENDER_API_KEY`, `RENDER_SERVICE_ID`).
+- Server đọc `PORT` từ môi trường và bind `0.0.0.0` nên chạy được mọi host.
+- Backend Python (`api_server.py`, `app.py`) chỉ dùng local, không deploy.
+
+## Cấu trúc
+
+```
+server/            # Node/Express backend (production)
+  src/controllers/predictController.ts
+  src/routes/api.ts
+  src/services/pixelAnalysisService.ts  # pipeline thật duy nhất
+  src/services/diseaseService.ts        # tra cứu bệnh
+  src/services/weatherService.ts
+frontend2/         # UI production (static HTML): predict/disease/admin/...
+models/            # disease_database.json, disease_info.json
+database/          # SQLite (gitignored *.db)
+tests/             # test API (đang viết lại, xem CHANGELOG)
+_archive/          # client/, frontend/, web/, templates/, root-src/, docs/ cũ
+```
+
+## Bảo mật
+
+- `.env.tunnel` từng bị commit kèm `CLOUDFLARE_API_TOKEN` thật. Đã gỡ khỏi git
+  index + gitignore + thay bằng placeholder. **Phải revoke/rotate token cũ trên
+  Cloudflare dashboard** vì token vẫn nằm trong lịch sử git cho tới khi purge.
+- `.env.production` chỉ chứa placeholder, cũng đã gỡ khỏi index.
+
+## Hạn chế đã biết (trung thực)
+
+- Pipeline hiện tại là heuristic màu sắc — phân biệt được lá xanh khỏe vs lá
+  nâu/vàng bệnh, nhưng **không có số liệu accuracy đo trên tập test có nhãn**.
+  Mọi con số 93–97% trong tài liệu cũ (đã chuyển vào `_archive/docs/`) là chưa
+  kiểm chứng, không còn hiệu lực.
+- Test: `tests/server/predict.test.ts` upload ảnh lá khỏe + lá bệnh thật (tạo bằng
+  Jimp), assert prediction khác nhau và không phải `NO_MODEL_INSTALLED`.
+  Chạy: `npm install` ở root rồi `npx jest tests/server/predict.test.ts`.
+  (E2E tương đương đã chạy local 17/17 pass ngày 2026-09-16.)
+- E2E trên domain live (`agri-ai-lyart.vercel.app`) chưa chạy lại sau deploy.

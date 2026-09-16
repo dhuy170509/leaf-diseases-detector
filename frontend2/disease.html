@@ -5,13 +5,59 @@
     <meta charset="utf-8">
     <title>Disease Info • LeafGuard</title>
     <link rel="stylesheet" href="/static/frontend2/style.css">
+    <script>try{var t=localStorage.getItem('lg-theme');if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}document.documentElement.dataset.theme=t}catch(e){}</script>
     <script type="module">
-        import { animateIn, registerReveal, initFloatingChat } from '/static/frontend2/app.js';
+        import { fetchJSON, toast, animateIn, registerReveal, initBottomNav, initFloatingChat } from '/static/frontend2/app.js';
         window.addEventListener('DOMContentLoaded', () => {
             animateIn('.card');
             registerReveal('.card, .accordion-item');
-            initFloatingChat({ apiEndpoint: '/chat', allowClientKey: false });
+            initBottomNav();
+            initFloatingChat({ apiEndpoint: '/api/chat', allowClientKey: false });
+            bindSearch();
+            loadDiseases('');
         });
+
+        function bindSearch() {
+            const input = document.getElementById('searchInput');
+            let timer;
+            input.addEventListener('input', () => {
+                clearTimeout(timer);
+                timer = setTimeout(() => loadDiseases(input.value.trim()), 300);
+            });
+        }
+
+        async function loadDiseases(query) {
+            const acc = document.getElementById('acc');
+            const count = document.getElementById('count');
+            try {
+                const url = query ? `/api/diseases/search?q=${encodeURIComponent(query)}` : '/api/diseases';
+                const data = await fetchJSON(url);
+                const diseases = data.diseases || [];
+                count.textContent = `${diseases.length} bệnh`;
+                acc.innerHTML = '';
+                if (!diseases.length) {
+                    acc.innerHTML = '<p class="muted">Không tìm thấy bệnh phù hợp.</p>';
+                    return;
+                }
+                diseases.forEach(d => {
+                    const item = document.createElement('div');
+                    item.className = 'accordion-item';
+                    const symptoms = (d.symptoms || []).join('; ');
+                    const treatment = (d.treatment || []).join('; ');
+                    item.innerHTML = `<div class="accordion-header"><span>${d.name || 'Không tên'}</span><span class="muted">${d.scientificName || ''}</span></div>` +
+                        `<div class="accordion-body"><p>${d.description || ''}</p>` +
+                        (symptoms ? `<p><strong>Triệu chứng:</strong> ${symptoms}</p>` : '') +
+                        (treatment ? `<p><strong>Xử lý:</strong> ${treatment}</p>` : '') + `</div>`;
+                    item.querySelector('.accordion-header').onclick = () => item.classList.toggle('active');
+                    acc.append(item);
+                });
+                registerReveal('.accordion-item');
+            } catch (e) {
+                count.textContent = '-';
+                acc.innerHTML = '<p class="muted">Không tải được thư viện bệnh. Kiểm tra backend.</p>';
+                toast('Không tải được thư viện bệnh');
+            }
+        }
     </script>
 </head>
 
@@ -23,49 +69,23 @@
             <a href="/frontend2/predict.html">Dự đoán</a>
             <a href="/frontend2/disease.html">Thư viện bệnh</a>
             <a href="/frontend2/support.html">Hỗ trợ</a>
+            <a href="/frontend2/admin.html">Quản trị</a>
         </div>
     </div>
     <div class="main" style="padding-top:90px;">
         <div class="card">
-            <h2>Thư viện bệnh</h2>
-            <div class="accordion" id="acc"></div>
-        </div>
-        <div class="card carousel" style="margin-top:16px;">
-            <img id="carouselImg" src="https://picsum.photos/seed/leaf1/900/400" alt="" />
-            <div class="dots" id="dots"></div>
+            <div class="flex" style="justify-content:space-between; align-items:center;">
+                <h2 style="margin:0;">Thư viện bệnh</h2>
+                <span id="count" class="pill">-</span>
+            </div>
+            <div class="form-floating" style="margin-top:12px;">
+                <input id="searchInput" class="input" placeholder=" " />
+                <label for="searchInput">Tìm bệnh theo tên / triệu chứng</label>
+            </div>
+            <div class="accordion" id="acc" style="margin-top:12px;"></div>
         </div>
     </div>
-    <script>
-        const diseases = [
-            { id: 'bacterial_spot', name: 'Bacterial Spot', crop: 'Tomato', severity: 'Trung binh', tips: 'Cat la benh, luan canh, dong goc.' },
-            { id: 'late_blight', name: 'Late Blight', crop: 'Potato', severity: 'Nang', tips: 'Thuoc goc mancozeb, loai bo tan du.' },
-        ];
-        const acc = document.getElementById('acc');
-        diseases.forEach(d => {
-            const item = document.createElement('div'); item.className = 'accordion-item';
-            item.innerHTML = `<div class="accordion-header">${d.name}<span class="muted">${d.crop}</span></div><div class="accordion-body">${d.tips}</div>`;
-            item.querySelector('.accordion-header').onclick = () => {
-                item.classList.toggle('active');
-            };
-            acc.append(item);
-        });
-        const imgs = [
-            'https://picsum.photos/seed/leaf1/900/400',
-            'https://picsum.photos/seed/leaf2/900/400',
-            'https://picsum.photos/seed/leaf3/900/400'
-        ];
-        const dots = document.getElementById('dots');
-        const imgEl = document.getElementById('carouselImg');
-        imgs.forEach((src, i) => {
-            const dot = document.createElement('div'); dot.className = 'dot' + (i === 0 ? ' active' : '');
-            dot.onclick = () => {
-                imgEl.src = src;
-                document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
-                dot.classList.add('active');
-            };
-            dots.append(dot);
-        });
-    </script>
+    <div class="toast"></div>
 </body>
 
 </html>

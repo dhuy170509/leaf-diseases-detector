@@ -5,8 +5,9 @@
     <meta charset="utf-8">
     <title>Predict • LeafGuard</title>
     <link rel="stylesheet" href="/static/frontend2/style.css">
+    <script>try{var t=localStorage.getItem('lg-theme');if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}document.documentElement.dataset.theme=t}catch(e){}</script>
     <script type="module">
-        import { toast, bindDropzone, fetchJSON, animateIn, initDropdownSearch, registerReveal, initFloatingChat } from '/static/frontend2/app.js';
+        import { toast, bindDropzone, fetchJSON, animateIn, initBottomNav, initFloatingChat } from '/static/frontend2/app.js';
 
         let lastPrediction = null;
 
@@ -19,23 +20,19 @@
             document.querySelector('#btnPredict').onclick = predict;
             document.querySelector('#btnReset').onclick = resetForm;
             document.querySelector('#btnReport').onclick = downloadReport;
-            registerReveal('.card');
-            initFloatingChat({ apiEndpoint: '/chat', allowClientKey: false });
+            initBottomNav();
+            initFloatingChat({ apiEndpoint: '/api/chat', allowClientKey: false });
             loadModels();
             animateIn('.card');
         });
 
         async function loadModels() {
             try {
-                const models = await fetchJSON('/models');
-                const sel = document.querySelector('#cropSelect');
-                sel.innerHTML = '';
-                models.filter(m => m.status === 'OK').forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m.crop || m.name; opt.textContent = m.crop || m.name; sel.append(opt);
-                });
-                const search = document.querySelector('#cropSearch');
-                initDropdownSearch(sel, search);
+                const data = await fetchJSON('/api/models');
+                const models = data.models || [];
+                const ok = models.filter(m => m.status === 'OK');
+                document.querySelector('#statModels').textContent = `${ok.length}/${models.length}`;
+                document.querySelector('#modelTag').textContent = `Model: ${ok[0] ? ok[0].name : '---'}`;
             } catch (e) {
                 toast('Không đọc được danh sách model');
             }
@@ -52,19 +49,19 @@
         async function predict() {
             const file = document.querySelector('#fileInput').files[0];
             if (!file) { toast('Chọn ảnh trước'); return; }
-            const crop = document.querySelector('#cropSelect').value;
             const btn = document.querySelector('#btnPredict');
             const bar = document.querySelector('#progressInner');
             btn.disabled = true; btn.classList.add('loading'); bar.style.width = '30%';
-            const fd = new FormData(); fd.append('file', file); fd.append('crop_name', crop);
+            const fd = new FormData(); fd.append('image', file);
             try {
-                const res = await fetch('/predict', { method: 'POST', body: fd });
+                const res = await fetch('/api/predict', { method: 'POST', body: fd });
                 bar.style.width = '70%';
                 const data = await res.json();
                 btn.disabled = false; btn.classList.remove('loading'); bar.style.width = '100%';
-                if (!res.ok) { toast(data.detail || 'Model đang khoá hoặc ảnh không hợp lệ'); return; }
+                if (!res.ok || !data.success) { toast(data.error || data.message || 'Ảnh không hợp lệ'); return; }
                 lastPrediction = data;
                 renderResult(data);
+                appendHistory(data);
             } catch (e) {
                 btn.disabled = false; btn.classList.remove('loading'); bar.style.width = '0%';
                 toast('Lỗi dự đoán');
@@ -72,25 +69,37 @@
         }
 
         function renderResult(data) {
-            const name = data.disease_name || 'Không xác định';
-            const conf = Math.round((data.confidence || 0) * 100);
-            const severity = (data.severity || 'medium').toLowerCase();
-            const severityClass = severity === 'high' ? 'danger' : severity === 'low' ? '' : 'accent';
+            const top = (data.top_predictions && data.top_predictions[0]) || {};
+            const name = data.prediction || top.name || 'Không xác định';
+            const conf = Math.round(((data.confidence ?? top.confidence ?? 0)) * 100);
+            const severity = String(data.severity || 'medium').toLowerCase();
+            const severityClass = ['severe', 'critical'].includes(severity) ? 'danger' : severity === 'healthy' ? '' : 'primary';
             document.querySelector('#diseaseName').textContent = name;
-            document.querySelector('#summaryText').textContent = data.recommendation || 'Đang phân tích và tạo gợi ý...';
+            const markers = (top.markers || []).join('; ');
+            const extra = [markers, typeof data.diseased_ratio === 'number' ? `Tỉ lệ điểm bệnh: ${Math.round(data.diseased_ratio * 100)}%` : ''].filter(Boolean).join(' • ');
+            document.querySelector('#summaryText').textContent = extra || 'Đã phân tích xong. Xem độ tin cậy và mức độ bên dưới.';
 
             const severityEl = document.querySelector('#severityBadge');
             severityEl.textContent = `Mức độ: ${severity}`;
             severityEl.className = `pill-lg ${severityClass}`.trim();
 
-            document.querySelector('#cropTag').textContent = `Cây: ${data.crop_name || 'N/A'}`;
-            document.querySelector('#modelTag').textContent = `Model: ${data.model_used || '---'}`;
+            document.querySelector('#modelTag').textContent = `Model: ${data.model || '---'}`;
             const confTag = document.querySelector('#confTag');
             confTag.textContent = `Độ tin cậy: ${conf}%`;
 
             const bar = document.querySelector('#reliabilityBar');
             bar.style.width = `${conf}%`;
-            document.querySelector('#statusLine').textContent = `CNN: ${conf}% • ${data.processing_time_ms || '?'} ms`;
+            document.querySelector('#statusLine').textContent = `PixelAI: ${conf}% • ${data.processing_time_ms ?? '?'} ms`;
+            document.querySelector('#statLatency').textContent = `${data.processing_time_ms ?? '-'}`;
+        }
+
+        function appendHistory(data) {
+            const list = document.querySelector('#historyList');
+            if (!list) return;
+            const li = document.createElement('li');
+            li.textContent = `${new Date(data.timestamp || Date.now()).toLocaleString('vi-VN')} • ${data.prediction} (${Math.round((data.confidence || 0) * 100)}%) • ${data.processing_time_ms ?? '?'} ms`;
+            list.prepend(li);
+            while (list.children.length > 10) list.lastChild.remove();
         }
 
         function resetForm() {
@@ -100,24 +109,24 @@
             updatePreview(null);
             lastPrediction = null;
             document.querySelector('#diseaseName').textContent = 'Chưa xác định';
-            document.querySelector('#summaryText').textContent = 'Tải ảnh lá, chọn cây và bấm Dự đoán để nhận gợi ý.';
+            document.querySelector('#summaryText').textContent = 'Tải ảnh lá và bấm Dự đoán để nhận kết quả phân tích.';
             document.querySelector('#severityBadge').className = 'pill-lg';
             document.querySelector('#severityBadge').textContent = '-';
-            document.querySelector('#cropTag').textContent = 'Cây: -';
             document.querySelector('#modelTag').textContent = 'Model: -';
             document.querySelector('#confTag').textContent = 'Độ tin cậy: -';
-            document.querySelector('#statusLine').textContent = 'CNN: chờ dự đoán.';
+            document.querySelector('#statusLine').textContent = 'PixelAI: chờ dự đoán.';
         }
 
         function downloadReport() {
             if (!lastPrediction) { toast('Chưa có báo cáo để tải'); return; }
             const payload = {
-                disease: lastPrediction.disease_name,
+                prediction: lastPrediction.prediction,
                 confidence: lastPrediction.confidence,
-                model: lastPrediction.model_used,
+                severity: lastPrediction.severity,
+                model: lastPrediction.model,
                 latency_ms: lastPrediction.processing_time_ms,
-                recommendation: lastPrediction.recommendation,
-                timestamp: new Date().toISOString()
+                top_predictions: lastPrediction.top_predictions,
+                timestamp: lastPrediction.timestamp
             };
             const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -136,6 +145,7 @@
             <a href="/frontend2/index.html">Trang chủ</a>
             <a href="/frontend2/predict.html">Dự đoán</a>
             <a href="/frontend2/disease.html">Thư viện bệnh</a>
+            <a href="/frontend2/support.html">Hỗ trợ</a>
             <a href="/frontend2/admin.html">Quản trị</a>
         </div>
     </div>
@@ -143,14 +153,14 @@
         <div class="page-hero">
             <div class="hero-grid">
                 <div>
-                    <div class="pill-ghost" style="margin-bottom:8px;">🔬 Predict • Local-first</div>
+                    <div class="pill-ghost" style="margin-bottom:8px;">Predict • Local-first</div>
                     <h1 class="display-title" style="font-size:32px; margin:4px 0 8px 0;">Phòng lab chẩn đoán lá</h1>
-                    <p class="muted" style="margin:0 0 12px 0;">Kéo thả ảnh, chọn cây, nhận gợi ý xử lý chuẩn và báo cáo
-                        tức thì.</p>
+                    <p class="muted" style="margin:0 0 12px 0;">Kéo thả ảnh, bấm Dự đoán,
+                        nhận kết quả phân tích điểm ảnh và báo cáo tức thì.</p>
                     <div class="flex" style="flex-wrap:wrap; gap:10px;">
-                        <span class="status-chip"><span class="dot"></span>Ensemble Active</span>
+                        <span class="status-chip"><span class="dot"></span>Pixel AI Active</span>
                         <span class="status-chip"><span class="dot"></span>Local inference</span>
-                        <span class="status-chip"><span class="dot"></span>CPU / Edge</span>
+                        <span class="status-chip"><span class="dot"></span>Node API</span>
                     </div>
                     <div class="grid"
                         style="grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:10px; margin-top:12px;">
@@ -170,20 +180,20 @@
                     <div class="step-list" style="margin-top:12px;">
                         <div class="step-item">
                             <div class="step-icon">1</div>
-                            <div><strong>Chọn cây</strong>
-                                <div class="muted">Gõ tìm nhanh, chọn đúng cây trồng.</div>
-                            </div>
-                        </div>
-                        <div class="step-item">
-                            <div class="step-icon">2</div>
                             <div><strong>Tải ảnh lá</strong>
                                 <div class="muted">Ảnh rõ, đủ sáng, tập trung vùng bệnh.</div>
                             </div>
                         </div>
                         <div class="step-item">
+                            <div class="step-icon">2</div>
+                            <div><strong>Bấm Dự đoán</strong>
+                                <div class="muted">Ảnh được phân tích điểm ảnh ngay trên server.</div>
+                            </div>
+                        </div>
+                        <div class="step-item">
                             <div class="step-icon">3</div>
                             <div><strong>Nhận kết quả</strong>
-                                <div class="muted">Tên bệnh, độ tin cậy và khuyến nghị.</div>
+                                <div class="muted">Tên bệnh, độ tin cậy và mức độ.</div>
                             </div>
                         </div>
                     </div>
@@ -191,14 +201,13 @@
                 <div class="card glass" id="summaryCard">
                     <div class="section-title">Tóm tắt</div>
                     <h1 id="diseaseName">Chưa xác định</h1>
-                    <p class="muted" id="summaryText">Tải ảnh lá, chọn cây và bấm Dự đoán để nhận gợi ý.</p>
+                    <p class="muted" id="summaryText">Tải ảnh lá và bấm Dự đoán để nhận kết quả.</p>
                     <div class="stat-row">
                         <span id="severityBadge" class="pill-lg">-</span>
-                        <span id="cropTag" class="pill-lg">Cây: -</span>
                         <span id="modelTag" class="pill-lg">Model: -</span>
-                        <span id="confTag" class="pill-lg accent">Độ tin cậy: -</span>
+                        <span id="confTag" class="pill-lg primary">Độ tin cậy: -</span>
                     </div>
-                    <div class="muted" id="statusLine">CNN: chờ dự đoán.</div>
+                    <div class="muted" id="statusLine">PixelAI: chờ dự đoán.</div>
                     <div class="stat-bar" style="margin:14px 0 10px 0;">
                         <div id="reliabilityBar"></div>
                     </div>
@@ -223,15 +232,7 @@
                 <div class="progress" style="margin-top:12px;">
                     <div id="progressInner"></div>
                 </div>
-                <div class="grid" style="grid-template-columns: 1fr 1fr; margin-top:12px;">
-                    <div>
-                        <div class="section-title">Chọn cây</div>
-                        <div class="form-floating">
-                            <input id="cropSearch" class="input" placeholder=" " />
-                            <label for="cropSearch">Tìm loại cây</label>
-                        </div>
-                        <select id="cropSelect" class="input"></select>
-                    </div>
+                <div class="grid" style="grid-template-columns: 1fr; margin-top:12px;">
                     <div class="flex" style="align-items:flex-end; justify-content:flex-end;">
                         <button id="btnPredict" class="btn" style="width:100%;">Dự đoán</button>
                     </div>
